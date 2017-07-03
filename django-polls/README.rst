@@ -27,3 +27,7 @@ Quick start
    to create a poll (you'll need the Admin app enabled).
 
 5. Visit http://127.0.0.1:8000/polls/ to participate in the poll.
+
+Polls now packaged as a python tar file, be sure to bring over all required files
+when moving from previous dir.  Tutorial finished, now to modify to add questions
+and a results form to dsiplay all results to public.
