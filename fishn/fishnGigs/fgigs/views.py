@@ -9,7 +9,7 @@ def detail(request, fishery_id):
 	return HttpResponse("this is fishery number %s." % fishery_id)
 
 def results(request, fishery_id):
-	response = "this is the result from fishery %s".
+	response = "this is the result from fishery %s."
 	return HttpResponse(response % fishery_id)
 
 def crew(request, fishery_id):

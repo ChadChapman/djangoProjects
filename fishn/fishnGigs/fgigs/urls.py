@@ -10,5 +10,7 @@ urlpatterns = [
 	# /fgigs/5/crew/
 	url(r'^(?P<fishery_id>[0-9]+)/crew/$', views.crew, name='crew'),
 	# /fgigs/5/vote/
-	url(r'^(?P<fishery_id>[0-9]+)/vote/$', views.vote, name='vote'),
+	url(r'^(?P<fishery_id>[0-9]+)/vote/$', views.results, name='vote'),
 	]
+
+	################# tut part 3 start here
