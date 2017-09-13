@@ -15,12 +15,16 @@ def index(request):
 	#return HttpResponse("index page!")
 	
 def detail(request, fishery_id):
-	try:
-		fishery = Fishery.objects.get(pk=fishery_id)
-	except:
-		raise Http404("Fishery does not exist")
-	return render(request, 'fgigs/detail.html', {'question':question})
-	#return HttpResponse("this is fishery number %s." % fishery_id)
+	#takes the place of the try/catch block below
+	fishery = get_object_or_404(Fishery, pk=fishery_id)
+	#also a get_list_or_404() - uses filter() and 404s if list empty
+	return render(request, 'fgigs/detail.html', {'fishery':fishery})	
+	#~ try:
+		#~ fishery = Fishery.objects.get(pk=fishery_id)
+	#~ except:
+		#~ raise Http404("Fishery does not exist")
+	#~ return render(request, 'fgigs/detail.html', {'question':question})
+	#~ #return HttpResponse("this is fishery number %s." % fishery_id)
 
 def results(request, fishery_id):
 	response = "this is the result from fishery %s."

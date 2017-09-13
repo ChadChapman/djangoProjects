@@ -1,1 +1,8 @@
+<h1>{{ fishery.descrption_text }}</h1>
+<ul>
+{% for crew in fishery.crew_set.all %}
+	<li>{{ crew.crew_text }}</li>
+{% endfor %}
+</ul>
+
 {{ fishery }}
