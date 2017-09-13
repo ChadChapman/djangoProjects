@@ -1,6 +1,7 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from .models import Fishery
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect
+from .models import Fishery, Crew
+from django.urls import reverse
 #from django.template import loader
 
 # Create your views here.
@@ -26,9 +27,25 @@ def detail(request, fishery_id):
 	#~ return render(request, 'fgigs/detail.html', {'question':question})
 	#~ #return HttpResponse("this is fishery number %s." % fishery_id)
 
-def results(request, fishery_id):
-	response = "this is the result from fishery %s."
-	return HttpResponse(response % fishery_id)
+def goget(request, fishery_id):
+	fishery = get_object_or_404(Fishery, pk=fishery_id)
+	try:
+		selected_crew = fishery.crew_set.get(pk=request.POST['crew'])
+	except(KeyError, Crew.DoesNotExist):
+		#go back to selection form
+		return render(request, 'fgigs/detail.html', {'fishery':fishery,
+			'error_message':"Crew was not selected.",
+			})
+	else:
+		selected_crew.votes +=1
+		selected_crew.save()
+		#return HttpResponseRedirect after successful POST, prevent
+		#double posting if user hits Back btn
+		return HttpResponseRedirect(reverse('fgigs:results',
+		args = (fishery.id,)))
+	
+	#response = "this is the result from fishery %s."
+	#return HttpResponse(response % fishery_id)
 
 def crew(request, fishery_id):
 	return HttpResponse("this is crew for fishery %s." % fishery_id)
