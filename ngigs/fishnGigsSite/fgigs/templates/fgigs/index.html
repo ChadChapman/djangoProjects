@@ -1,7 +1,7 @@
 {% if latest_fishery_list %}
 	<ul>
 	{% for fishery in latest_fishery_list %}
-		<li><a href="/polls/{{ fishery.id }}/">
+		<li><a href="{% url 'fgigs:detail' fishery.id %}">
 			{{fishery.description_text }}</a></li>
 	{% endfor %}
 	</ul>

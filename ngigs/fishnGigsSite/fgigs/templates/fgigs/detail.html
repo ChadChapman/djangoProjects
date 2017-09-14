@@ -1,1 +1,25 @@
-{{ fishery }}
+<h1>{{ fishery.descrption_text }}</h1>
+
+{% if error_message %}
+	<p><strong>{{ error_message }}</strong></p>
+{% endif %}
+
+<form action="{% url 'fgigs:vote' fishery.id %}" method="post">
+	{% csrf_token %}
+	{% for crew in fishery.crew_set.all %}
+		<input type = "radio" name = "crew" id = "crew{{ forloop.counter
+			}}" value = "{{ crew.id }}" />
+		<label for = "crew{{ forloop.counter }}">{{ crew.crew_text }}
+		</label>
+		<br />
+	{% endfor %}
+	<input type = "submit" value = "Vote" />
+</form>
+<!--
+<ul>
+{% for crew in fishery.crew_set.all %}
+	<li>{{ crew.crew_text }}</li>
+{% endfor %}
+</ul>
+-->
+
