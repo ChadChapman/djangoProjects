@@ -49,3 +49,9 @@ def goget(request, fishery_id):
 
 def crew(request, fishery_id):
 	return HttpResponse("this is crew for fishery %s." % fishery_id)
+	
+def results(request, fishery_id):
+	fishery = get_object_or_404(Fishery, pk=fishery_id)
+	return render(request, 'fgigs/results.html', {'fishery':fishery})
+	
+	
