@@ -1,0 +1,10 @@
+<h1>{{ fishery.description_text }}</h1>
+
+<ul>
+{% for crew in fishery.crew_set.all %}
+	<li>{{ crew.crew_text }} -- {{ crew.votes }} vote 
+	{{ crew.votes|pluralize }} </li>
+{% endfor %}
+</ul>
+
+<a href="{% url 'fgigs:detail' fishery.id %}">Search again?</a>

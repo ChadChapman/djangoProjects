@@ -2,24 +2,47 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from .models import Fishery, Crew
 from django.urls import reverse
+from django.views import generic
 #from django.template import loader
 
 # Create your views here.
-def index(request):
-	latest_fishery_list = Fishery.objects.order_by('-pub_date')[:5]
-	template = loader.get_template('fgigs/index.html')
-	context = {'latest_fishery_list': latest_fishery_list,}
-	return render(request, 'fgigs/index.html', context)
+#switched to class based generic views now
+#ListView = display a list of objects
+class IndexView(generic.ListView):
+	#generic.ListView defaults to 'appName/modelName_list.html'
+	#this overrides the default
+	template_name = 'fgigs/index.html'
+	#generic view autogens context var: fishery_list
+	#overrides default, but could change template instead
+	context_object_name = 'latest_fishery_list'
+	
+	def get_queryset(self):
+		#return last five updated (published) fisheries
+		return Fishery.objects.order_by('-pub_date')[:5]
+		
+#~ def index(request):
+	#~ latest_fishery_list = Fishery.objects.order_by('-pub_date')[:5]
+	#~ template = loader.get_template('fgigs/index.html')
+	#~ context = {'latest_fishery_list': latest_fishery_list,}
+	#~ return render(request, 'fgigs/index.html', context)
 	#return HttpResponse(template.render(context,request))
 	#output = ','.join([f.description_text for f in latest_fishery_list])
 	#return HttpResponse(output)
 	#return HttpResponse("index page!")
-	
-def detail(request, fishery_id):
-	#takes the place of the try/catch block below
-	fishery = get_object_or_404(Fishery, pk=fishery_id)
-	#also a get_list_or_404() - uses filter() and 404s if list empty
-	return render(request, 'fgigs/detail.html', {'fishery':fishery})	
+
+#generic.DetailView = display page of details of one object
+#generic.DetailView expects primary key as pk from URL
+#generic.DetailView defaults to 'appName/modelName_detail.html for template	
+class DetailView(generic.DetailView):
+	model = Fishery
+	#overriding the default template name, as mentioned above
+	template_name = 'fgigs/detail.html'
+		
+#~ def detail(request, fishery_id):
+	#~ #takes the place of the try/catch block below
+	#~ fishery = get_object_or_404(Fishery, pk=fishery_id)
+	#~ #also a get_list_or_404() - uses filter() and 404s if list empty
+	#~ return render(request, 'fgigs/detail.html', {'fishery':fishery})	
 	#~ try:
 		#~ fishery = Fishery.objects.get(pk=fishery_id)
 	#~ except:
@@ -27,6 +50,18 @@ def detail(request, fishery_id):
 	#~ return render(request, 'fgigs/detail.html', {'question':question})
 	#~ #return HttpResponse("this is fishery number %s." % fishery_id)
 
+class ResultsView(generic.DetailView):
+	model = Fishery
+	#still a generic.DetailView but displaying as different template
+	template_name = 'fgigs/results.html'
+	
+#~ def results(request, fishery_id):
+	#~ fishery = get_object_or_404(Fishery, pk=fishery_id)
+	#~ return render(request, 'fgigs/results.html', {'fishery':fishery})	
+
+def crew(request, fishery_id):
+	return HttpResponse("this is crew for fishery %s." % fishery_id)
+	
 def goget(request, fishery_id):
 	fishery = get_object_or_404(Fishery, pk=fishery_id)
 	try:
@@ -45,7 +80,4 @@ def goget(request, fishery_id):
 		args = (fishery.id,)))
 	
 	#response = "this is the result from fishery %s."
-	#return HttpResponse(response % fishery_id)
-
-def crew(request, fishery_id):
-	return HttpResponse("this is crew for fishery %s." % fishery_id)
+	#return HttpResponse(response % fishery_id)	
