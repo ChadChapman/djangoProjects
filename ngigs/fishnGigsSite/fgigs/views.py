@@ -4,6 +4,7 @@ from .models import Fishery, Crew
 from django.urls import reverse
 from django.views import generic
 #from django.template import loader
+from django.utils import timezone
 
 # Create your views here.
 #switched to class based generic views now
@@ -18,7 +19,9 @@ class IndexView(generic.ListView):
 	
 	def get_queryset(self):
 		#return last five updated (published) fisheries
-		return Fishery.objects.order_by('-pub_date')[:5]
+		return Fishery.objects.filter(updated_date__lte=
+		timezone.now()).order_by('-pub_date')[:5]
+		#return Fishery.objects.order_by('-pub_date')[:5]
 		
 #~ def index(request):
 	#~ latest_fishery_list = Fishery.objects.order_by('-pub_date')[:5]
@@ -29,6 +32,8 @@ class IndexView(generic.ListView):
 	#output = ','.join([f.description_text for f in latest_fishery_list])
 	#return HttpResponse(output)
 	#return HttpResponse("index page!")
+	
+#################################################################
 
 #generic.DetailView = display page of details of one object
 #generic.DetailView expects primary key as pk from URL
