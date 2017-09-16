@@ -2,12 +2,24 @@ import datetime
 
 from django.test import TestCase
 from django.utils import timezone
+from django.urls import reverse
 
 from .models import Fishery
 
-# Create your tests here.
+def create_fishery(description_text, days):
+	""" new fishery with param description text and param days as for update
+	delta, neg. days are in past and pos. days are in future. """
+	time = timezone.now() + datetime.timedelta(days=days)
+	return Question.objects.create(description_text=description_text,
+	updated_date=updated_date)
+
+# create tests below.
 #to run in term: python3 manage.py test fgigs
-#test method must begin with "test..."
+#test method must begin with "test_..."
+
+#####################################################################
+
+#model tests
 class FisheryModelTests(TestCase):
 	
 	def test_was_published_recently_with_future_fishery(self):
@@ -31,3 +43,27 @@ class FisheryModelTests(TestCase):
 		seconds=59)
 		recent_fishery = Fishery(update_date = time)
 		self.assertIs(recent_fishery.was_updated_recently(),True)
+
+#####################################################################
+
+#view tests
+class QuestionIndexViewTests(TestCase):
+	
+	def test_no_fisheries(self):
+		""" if no fisheries, display emptyList template """
+		response = self.client
+
+#####################################################################
+#~ testing in the shell:
+	#~ from django.text.utils import setup_test_environment
+	#~ setup_test_environment()
+	#~ from django.test import Client
+	#~ client = Client()
+	#~ # test '/'
+	#~ response = client.get('/')
+	#~ response.status_code
+	#~ from django.urls import reverse
+	#~ response = client.get(reverse('fgigs:index'))
+	#~ response.status_code
+	#~ response.content
+	#~ response.context['latest_fishery_list']
