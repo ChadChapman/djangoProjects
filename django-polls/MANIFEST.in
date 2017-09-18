@@ -1,6 +1,0 @@
-include LICENSE
-include READEME.rst
-recursive-include polls/static *
-recursive-include polls/templates *
-recursive-include polls/docs *
-
