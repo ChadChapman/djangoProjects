@@ -32,6 +32,9 @@ class FisheryAdmin(admin.ModelAdmin):
 		inlines = [CrewInLine]
 		#django defaults to str() for each obj, but list_display can be set also
 		list_display = ('description_text', 'opening_date', 'updated_date')
+		list_filter = ['updated_date']
+		#users can search by this:
+		search_fields = ['description_text']
 admin.site.register(Fishery, FisheryAdmin)
 
 ########################################################################
