@@ -47,11 +47,44 @@ class FisheryModelTests(TestCase):
 #####################################################################
 
 #view tests
-class QuestionIndexViewTests(TestCase):
-	
+class FisheryIndexViewTests(TestCase):
+	#some of these tests should be broken up into several tests
 	def test_no_fisheries(self):
 		""" if no fisheries, display emptyList template """
-		response = self.client
+		response = self.client.get(reverse('fgigs:index'))
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, "No fisheries are available.")
+		self.assertQuerysetEqual(response.context['latest_question_list'], [])
+		
+	def test_past_fishery(self):
+		"""Fisheries with updated_recently in the past are displayed on index page"""
+		create_fishery(description_text="Past updated fishery.", days=-30)
+		response = self.client.get(reverse('fgigs:index'))
+		self.assertQuerysetEqual(response.context['latest_question_list'],
+		['<Fishery: Past fishery.>'])
+		
+	def test_future_fishery(self):
+		"""Fisheries with an update_date in the future aren't displayed on index page yet."""
+		create_fishery(description_text="Future fishery.", days = 30)
+		response = self.client.get(reverse'fgigs:index'))
+		self.assertContains(response, "No fisheries are available.")
+		self.assertQuerysetEqual(response.context['latest_fishery_list'],[])
+		
+	def test_future_fishery_and_past_fishery(self):
+		"""If both past and future fisheries exist, only past are displayed"""
+		create_fishery(description_text="Past fishery.", days=-30)
+		create_fishery(description_text="Future fishery.", days=30)
+		response = self.client.get(reverse('fgigs:index'))
+		self.assertQuerysetEqual( response.context['latest_fishery_list'],
+		['<Fishery: Past fishery.>'])
+		
+	def test_two_past_fisheries(self):
+		"""Fishery index page can display >1 fisheries"""
+		create_fishery(description_text="Past fishery 1.", days=-30)
+		create_fishery(description_text="Past fishery 2.", days=-10)
+		response = self.client.get(reverse('fgigs:index'))
+		self.assertQuerysetEqual(response.context['latest_fishery_list'],
+		['<Fishery: Past fishery 2.>', '<Fishery: Past fishery 1.>'])	
 
 #####################################################################
 #~ testing in the shell:
