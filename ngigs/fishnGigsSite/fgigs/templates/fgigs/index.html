@@ -1,3 +1,8 @@
+{% load static %}
+
+<!-- static tag gens abs. url of static files -->
+<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}" />
+
 {% if latest_fishery_list %}
 	<ul>
 	{% for fishery in latest_fishery_list %}

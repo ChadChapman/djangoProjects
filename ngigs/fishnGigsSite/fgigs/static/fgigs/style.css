@@ -1,0 +1,24 @@
+
+
+
+/*
+ * django's STATICFILES_FINDERS in settings.py has list of finders 
+ * AppDirectoriesFinder searched for "static" dir in each INSTALLED_APPS
+ * this file can be ref as fgigs/style.css for finders
+ * 
+ * static template tag not available for static files which aren't django-generated
+ * always use relative paths to link static files between each other, then can change
+ * STATIC_URL, which is used by "static" template tag to gen its URLS, then avoid
+ * modifying the static files as well
+ * 
+*/
+
+body {
+	background: white url("images/background.gif") no-repeat right bottom;
+	}
+
+li a {
+	color: green;
+	}
+	
+
