@@ -16,6 +16,7 @@ def create_fishery(description_text, days):
 # create tests below.
 #to run in term: python3 manage.py test fgigs
 #test method must begin with "test_..."
+#db is auto reset after each test method
 
 #####################################################################
 
@@ -85,6 +86,24 @@ class FisheryIndexViewTests(TestCase):
 		response = self.client.get(reverse('fgigs:index'))
 		self.assertQuerysetEqual(response.context['latest_fishery_list'],
 		['<Fishery: Past fishery 2.>', '<Fishery: Past fishery 1.>'])	
+
+#####################################################################
+
+class FisheryDetailViewTests(TestCase):
+	def test_future_fishery(self):
+		"""detail view of a fishery with update_date in the future returns 404."""
+		future_fishery = create_fishery(description_text="Future fishery.", days=30)
+		url = reverse('fgigs:detail', args=(future_fishery.id,))
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 404)
+		
+	def test_past_fishery(self):
+		"""detail view of fishery with update_date in past display's fishery's
+		description text."""
+		past_fishery = create_fishery(description_text='Past Fishery.', days=-30)
+		url = reverse('fgigs:detail', args=(past_fishery.id,))
+		response = self.client.get(url)
+		self.assertContains(response, past_fishery.description_text)
 
 #####################################################################
 #~ testing in the shell:

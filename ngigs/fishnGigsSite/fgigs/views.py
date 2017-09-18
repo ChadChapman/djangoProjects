@@ -42,6 +42,10 @@ class DetailView(generic.DetailView):
 	model = Fishery
 	#overriding the default template name, as mentioned above
 	template_name = 'fgigs/detail.html'
+	
+	df get_queryset(self):
+		"""Exclude fisheries with only future updates set."""
+		return Fishery.objects.filter(updated_date__lte=timezone.now())
 		
 #~ def detail(request, fishery_id):
 	#~ #takes the place of the try/catch block below
