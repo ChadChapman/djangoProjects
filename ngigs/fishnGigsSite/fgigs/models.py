@@ -15,7 +15,10 @@ class Fishery(models.Model):
 		now = timezone.now()
 		return now - datetime.timedelta(days=1) <= self.updated_date <= now
 		#return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
-
+		was_updated_recently.admin_order_field = 'updated_date'
+		was_updated_recently.boolean = True
+		was_updated_recently.short_description = 'Updated recently?'
+		
 	def __str__(self): #toString method
 		return self.description_text
 
