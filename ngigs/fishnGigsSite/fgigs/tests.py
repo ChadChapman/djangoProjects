@@ -17,6 +17,13 @@ def create_fishery(description_text, days):
 #to run in term: python3 manage.py test fgigs
 #test method must begin with "test_..."
 #db is auto reset after each test method
+#django includes LiveServerTestCase to interact with Selenium for HTML, JS tests
+
+
+#test to add still: Fishery-check for no crew (make fishery with no crew, make sure it isn't displayed?)
+#Fishery-with crew (check it is displayed correctly)
+#logged in admin should see all fisheries and crew
+ 
 
 #####################################################################
 
@@ -104,6 +111,12 @@ class FisheryDetailViewTests(TestCase):
 		url = reverse('fgigs:detail', args=(past_fishery.id,))
 		response = self.client.get(url)
 		self.assertContains(response, past_fishery.description_text)
+
+#####################################################################
+
+class FisheryResultsViewTests(TestCase):
+	#results view for returned fisheries
+	#get_queryset just like in the detail view
 
 #####################################################################
 #~ testing in the shell:
