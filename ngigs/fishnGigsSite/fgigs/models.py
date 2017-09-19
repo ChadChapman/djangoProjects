@@ -2,6 +2,7 @@ import datetime
 
 from django.db import models
 from django.utils import timezone
+from django.core import serializers
 
 # Create your models here.
 #fisheries and crew in those fisheries to begin with
@@ -22,7 +23,7 @@ class Fishery(models.Model):
 	#make sure to clearly note this is not official and no liability on site owner 
 	fishery_licenses = models.CharField(max_length=150)
 	#the field below is to keep track of when crew or jobs added to this fishery
-	last_updated = models.DateTimeField('last updated on')
+	last_updated = models.DateTimeField(auto_now=True, 'last updated on')
 	
 	#method to signal if this Fishery has been updated in the last n amount of time
 	#currently n is 1 day 
@@ -43,6 +44,8 @@ class Fishery(models.Model):
 		
 		return info_summary
 		
+	serialized_data = serializers.serialize("json", Fishery.objects.all())
+		
 ##########################################################################
 
 class Crew(models.Model):
@@ -51,11 +54,49 @@ class Crew(models.Model):
 	#crew can only post to one fishery at a time or one port at a time and all fisheries
 	#crew can only post to home port
 	#crew can only post to one current port
+	crew_first_name = models.CharField(max_length=32)
+	crew_last_name = models.CharField(max_length=32)
 	
 	#selected fishery this crew ad is for
 	crew_fishery = models.ForeignKey(Fishery, on_delete=models.CASCADE)
+	
 	#blurb crew ad poster can write about themselves
 	crew_text = models.CharField(max_length=200)
+	
+	#port they live in or prefer to fish out of, "regular" port
+	crew_home_port = models.CharField(max_length=32)
+	home_port_state = models.CharField(max_length=32)
+	#home_port_id = models.ForeignKey(Port, on_delete=models.CASCADE)
+	
+	#port they may be in currently, if different than home port
+	crew_current_port = models.CharField(max_length=32)
+	current_port_state = models.CharField(max_length=32)
+	#current_port_id = models.ForeignKey(Port, on_delete=models.CASCADE)
+	
+	#years total of fishing experience
+	fishery_exp_years = models.SmallIntegerField()
+	
+	crew_available = models.DateTimeField
+	
+	crew_ad_created = models.DateTimeField(auto_now_add=True)
+	
+	#fisheries crew has most experience in
+	fishery_exp_1 = models.CharField(max_length=50)
+	fishery_exp_2 = models.CharField(max_length=50)
+	fishery_exp_3 = models.CharField(max_length=50)
+	#brief summary of any other fishery experience
+	fishery_exp_1 = models.CharField(max_length=150)
+	#whether crew is considered "green" or not
+	#change this to a NullBooleanField() ?
+	is_green = models.BooleanField()
+	#any further description of their skills
+	skills_desc = models.CharField(max_length=150)
+	
+	#whether crew will to another port for work or not
+	will_travel = models.BooleanField()
+	phone_number = models.CharField(max_length=30)
+	eamil_addr = models.CharField(max_length=50)
+	
 	
 	#how many views this crew's ad has gotten
 	#crew_looks = models.IntegerField(default=0) #how many time someone has looked at their profile
