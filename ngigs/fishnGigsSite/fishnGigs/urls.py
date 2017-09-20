@@ -19,6 +19,8 @@ from django.contrib import admin
 urlpatterns = [
 	#You should always use include() when you include other URL patterns. 
 	#admin.site.urls is the only exception to this.
+	
+	#point to the fgigs app (and its urls) in the project:
 	url(r'^fgigs/', include('fgigs.urls')),
     url(r'^admin/', admin.site.urls),
 ]
