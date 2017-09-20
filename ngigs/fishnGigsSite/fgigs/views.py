@@ -58,27 +58,39 @@ class FisheryPKIndexView(generic.ListView):
 		""" should return all fisheries with provided PK for all states fishery
 		is listed in. url directing here should use named groups for capturing
 		kwargs. Primary Key should be 'fishery_id' """
-	try:
-		""" use the context object name here or are they unrealted? 
-		so this will be a list and need all results from all states?"""
-		#fishery_pk_list = get_object_or_404(Fishery, pk=fishery_id)
-		fishery = get_object_or_404(Fishery, pk=fishery_id)
-	except(KeyError, Fishery.DoesNotExist):
-		""" would rather flash an error message and go back to fisheryindexall.html
-		but for now can make error pages i guess.  error pages for not founds or
-		nothing listed situations """
-		return render(request, 'fgigs/fisherynotfound.html', {'fishery':fishery,
-			'error_message':"Fishery was not found.",
-			})
-	else:
-		""" so the try worked, now make sure the template has the queryset and 
-		renders it ocrrectly """
-		selected_crew.votes +=1
-		selected_crew.save()
-		#return HttpResponseRedirect after successful POST, prevent
-		#double posting if user hits Back btn
-		return HttpResponseRedirect(reverse('fgigs:results',
-		args = (fishery.id,)))
+		try:
+			""" use the context object name here or are they unrealted? 
+			so this will be a list and need all results from all states?"""
+			#fishery_pk_list = get_object_or_404(Fishery, pk=fishery_id)
+			#index_fishery = get_object_or_404(Fishery, pk=fishery_id)
+			pkquery = Fishery.objects.filter(pk=fishery_id)
+		except(KeyError, Fishery.DoesNotExist):
+			""" would rather flash an error message and go back to fisheryindexall.html
+			but for now can make error pages i guess.  error pages: for not founds or
+			nothing listed situations """
+			return render(request, 'fgigs/fisherynotfound.html', {'fishery':fishery,
+				'error_message':"Fishery was not found.",
+				})
+		else:
+			""" so the try worked, now make sure the template has the queryset and 
+			renders it correctly.  Iter through the ints in the 
+			fishery_state_id_list and build a list of Fishery (one for each state) 
+			objects to pass to the template """
+			#check if specific state_fishery (num of objects in queryset <= 1)
+			if (pkquery.len()__=1):
+				#for each foreignKeyID in the field's list, get the Fishery object, append
+				for fkid in 
+				#get the state fishery with fishery_id and pkid
+				state_fishery = get_object_or_404(Fishery, pk=fishery_id, fkid=fishery_state_id)
+				
+			else:
+				return 	
+			#~ selected_crew.votes +=1
+			#~ selected_crew.save()
+			#~ #return HttpResponseRedirect after successful POST, prevent
+			#~ #double posting if user hits Back btn
+			#~ return HttpResponseRedirect(reverse('fgigs:results',
+			#~ args = (fishery.id,)))
 	
 #################################################################
 
