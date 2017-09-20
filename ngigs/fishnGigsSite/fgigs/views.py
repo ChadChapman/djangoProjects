@@ -36,15 +36,61 @@ class IndexView(generic.ListView):
 	
 #################################################################
 
-class FisheryIndexView(generic.ListView):
+class FisheryAllIndexView(generic.ListView):
 	#override the default template name
-	template_name = 'fgigs/fisheryindex.html'
+	template_name = 'fgigs/fisheryallindex.html'
 	#override the autogen context var with this:
-	context_object_name = 'db_fishery_list'
+	context_object_name = 'fishery_all_list'
 	
 	def get_queryset(self):
 		#should return all fisheries in db
 		return Fishery.objects.all()
+	
+#################################################################
+
+class FisheryPKIndexView(generic.ListView):
+	"""one fishery, filtered by primary key (self.id)
+	should return: list of all fisheries by PK, from all States """
+	template_name = 'fgigs/fisherypkindex.html'
+	context_object_name = 'fishery_pk_list'
+	
+	def get_queryset(request, fishery_id):
+		""" should return all fisheries with provided PK for all states fishery
+		is listed in. url directing here should use named groups for capturing
+		kwargs. Primary Key should be 'fishery_id' """
+	try:
+		""" use the context object name here or are they unrealted? 
+		so this will be a list and need all results from all states?"""
+		#fishery_pk_list = get_object_or_404(Fishery, pk=fishery_id)
+		fishery = get_object_or_404(Fishery, pk=fishery_id)
+	except(KeyError, Fishery.DoesNotExist):
+		""" would rather flash an error message and go back to fisheryindexall.html
+		but for now can make error pages i guess.  error pages for not founds or
+		nothing listed situations """
+		return render(request, 'fgigs/fisherynotfound.html', {'fishery':fishery,
+			'error_message':"Fishery was not found.",
+			})
+	else:
+		""" so the try worked, now make sure the template has the queryset and 
+		renders it ocrrectly """
+		selected_crew.votes +=1
+		selected_crew.save()
+		#return HttpResponseRedirect after successful POST, prevent
+		#double posting if user hits Back btn
+		return HttpResponseRedirect(reverse('fgigs:results',
+		args = (fishery.id,)))
+	
+#################################################################
+
+class FisheryPKStatePKIndexView(generic.ListView):
+	""" one fishery, in one state, both by pk or ids.  fishery_id and state_id
+	should both be captured from url """
+	
+	def get_queryset(request, fishery_id, state_id):
+		try:
+			
+		except(KeyError, Fishery.DoesNotExist, State.DoesNotExist):
+			
 
 #generic.DetailView = display page of details of one object
 #generic.DetailView expects primary key as pk from URL
@@ -54,7 +100,7 @@ class DetailView(generic.DetailView):
 	#overriding the default template name, as mentioned above
 	template_name = 'fgigs/detail.html'
 	
-	df get_queryset(self):
+	def get_queryset(self):
 		"""Exclude fisheries with only future updates set."""
 		return Fishery.objects.filter(updated_date__lte=timezone.now())
 		
