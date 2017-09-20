@@ -4,14 +4,24 @@ from django.db import models
 from django.utils import timezone
 from django.core import serializers
 
-# Create your models here.
-#fisheries and crew in those fisheries to begin with
+""" states with fisheries | fisheries with crew | states with crew  
+"""
+
+class State(models.Model):
+	# each state included in the db 
+	state_name = models.CharField(max_length=30)
+	state_nation = models.CharField(max_length=30)
+	name_abbreviation = models.CharField(max_length=6)
+	
+	def __str__(self):
+		return name_abbreviation
 
 class Fishery(models.Model):
-	#all relevant info for a specific fishery, in a specific state
-	#eg Oregon Crab will be a different table than Washington Crab
+	"""all relevant info for a specific fishery, in a specific state
+	eg Oregon Crab will be a different table than Washington Crab """
 	fishery_name = models.CharField(max_length=50)
 	fishery_state = models.CharField(max_length=50)
+	fishery_state_id = models.ForeignKey(State, on_delete=models.CASCADE)
 	#seasons of year: Summer, Fall, Winter, Spring or any set out of those
 	fishery_seasons = models.CharField(max_length=50)
 	#brief description of specific fishery such as seine vs troll salmon

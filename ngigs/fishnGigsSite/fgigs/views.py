@@ -16,7 +16,8 @@ class IndexView(generic.ListView):
 	#generic view autogens context var: fishery_list
 	#overrides default, but could change template instead
 	context_object_name = 'latest_fishery_list'
-	
+	#i think this actual index should just be the search by port or by fishery
+	#landing page, with buttons for create a new ad for either
 	def get_queryset(self):
 		#return last five updated (published) fisheries
 		return Fishery.objects.filter(updated_date__lte=
@@ -34,6 +35,16 @@ class IndexView(generic.ListView):
 	#return HttpResponse("index page!")
 	
 #################################################################
+
+class FisheryIndexView(generic.ListView):
+	#override the default template name
+	template_name = 'fgigs/fisheryindex.html'
+	#override the autogen context var with this:
+	context_object_name = 'db_fishery_list'
+	
+	def get_queryset(self):
+		#should return all fisheries in db
+		return Fishery.objects.all()
 
 #generic.DetailView = display page of details of one object
 #generic.DetailView expects primary key as pk from URL
