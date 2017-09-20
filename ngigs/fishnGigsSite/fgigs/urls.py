@@ -28,15 +28,17 @@ urlpatterns = [
 	#url(r'^(?P<fishery_id>[0-9]+)/$', views.detail, name='detail'),
 	#url(r'^(?P<pk>[0-9]+)/$', views.DetailView.as_view(), name='detail'),
 	
-	# /fgigs/fisheries/
+	# /fgigs/fisheries/all/
 	# show index of all fisheries
 	url(r'^fisheries/all/$', views.FisheryAllIndexView.as_view(), name='fisheryallindex'),
 			
 	# /fgigs/fisheries/3/
 	# show fishery with pk=3
+	url(r'^fisheries/(?P<pk>[0-9]+)/$', views.FisheryPKView.as_view(), name='fisherypk'),
 	
-	# /fgigs/ports/3/crew/
+	# /fgigs/fisheries/3/crew/
 	# show crew ads for fishery where fishery pk=3
+	url(r'^fisheries/(?P<pk>[0-9]+)/crew/$', views.FisheryPKCrewView.as_view(), name='fisherypkcrew'),
 	
 	# /fgigs/fisheries/state/2/?
 	# show fisheries in state where state has id or pk=2
