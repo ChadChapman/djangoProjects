@@ -33,13 +33,17 @@ urlpatterns = [
 	url(r'^fisheries/all/$', views.FisheryAllIndexView.as_view(), name='fisheryallindex'),
 			
 	# /fgigs/fisheries/3/
-	# show fishery with pk=3
-	url(r'^fisheries/(?P<pk>[0-9]+)/$', views.FisheryPKView.as_view(), name='fisherypk'),
+	# show fishery with pk=3, all states included
+	url(r'^fisheries/(?P<fishery_id>[0-9]+)/$', views.FisheryPKView.as_view(), name='fisherypkindex'),
 	
 	# /fgigs/fisheries/3/crew/
 	# show crew ads for fishery where fishery pk=3
-	url(r'^fisheries/(?P<pk>[0-9]+)/crew/$', views.FisheryPKCrewView.as_view(), name='fisherypkcrew'),
-	
+	url(r'^fisheries/(?P<fishery_ids>[0-9]+)/crew/$', views.FisheryPKCrewView.as_view(), name='fisherypkcrew'),
+		
+	# /fgigs/fisheries/3/states/2/
+	# show fishery with pk=3, in state with pk = 2
+	url(r'^fisheries/(?P<fishery_id>[0-9]+)/states/(?P<state_id>[0-9]+)/$', views.FisheryPKStatePKView.as_view(), name='fisherypkindex'),
+		
 	# /fgigs/fisheries/state/2/?
 	# show fisheries in state where state has id or pk=2
 	# need to make State model then? dive into this later

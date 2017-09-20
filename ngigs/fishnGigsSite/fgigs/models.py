@@ -12,23 +12,41 @@ class State(models.Model):
 	state_name = models.CharField(max_length=30)
 	state_nation = models.CharField(max_length=30)
 	name_abbreviation = models.CharField(max_length=6)
+	#fisheries
+	#ports
+	#crew
+	#gigs
 	
 	def __str__(self):
 		return name_abbreviation
 
 class Fishery(models.Model):
-	"""all relevant info for a specific fishery, in a specific state
-	eg Oregon Crab will be a different table than Washington Crab """
+	"""all relevant info for a specific fishery, changed from each state having 
+	own table to each Fishery having a list of names? keys? to States where each
+	Fishery is located"""
 	fishery_name = models.CharField(max_length=50)
-	fishery_state = models.CharField(max_length=50)
-	fishery_state_id = models.ForeignKey(State, on_delete=models.CASCADE)
+	#fishery_state = models.CharField(max_length=50)
+	#fishery_state_id = models.ForeignKey(State, on_delete=models.CASCADE)
+	"""rather than the two fields above, going with a "list" of ints
+	representing the pk or ids of states where this fishery is located.
+	according to django docs, CommaSeperatedIntegerField is deprecated now, so: """
+	try:
+		fishery_state_id_list = models.CharField(max_length=50, 
+		validators=[validate_comma_seperated_integer_list])
+	except(ValidationErr):
+		return render(request, 'fgigs/addfishery.html', 
+		{'fishery_name':fishery_name, 
+		'error_message':"Fishery was not provided with comma seperated list of state.ids.",
+			})
 	#seasons of year: Summer, Fall, Winter, Spring or any set out of those
 	fishery_seasons = models.CharField(max_length=50)
+	
 	#brief description of specific fishery such as seine vs troll salmon
 	fishery_description = models.CharField(max_length=100)
 	#first offical day of fishery season, so w/o strikes or other delays
 	#if several openers during the year, this will be the next opener date
 	opening_date = models.DateTimeField('season start date')
+	
 	#any known required licenses for participating in this fishery
 	#make sure to clearly note this is not official and no liability on site owner 
 	fishery_licenses = models.CharField(max_length=150)
@@ -59,11 +77,11 @@ class Fishery(models.Model):
 ##########################################################################
 
 class Crew(models.Model):
-	#crew can post to one fishery but in multiple states at once
-	#eg crew can post to Crab in Oregon, WA, CA all at same time (will travel)
-	#crew can only post to one fishery at a time or one port at a time and all fisheries
-	#crew can only post to home port
-	#crew can only post to one current port
+	""" crew can post to one fishery but in multiple states at once
+	eg crew can post to Crab in Oregon, WA, CA all at same time (will travel)
+	crew can only post to one fishery at a time or one port at a time and all fisheries
+	crew can only post to home port
+	crew can only post to one current port """
 	crew_first_name = models.CharField(max_length=32)
 	crew_last_name = models.CharField(max_length=32)
 	
@@ -76,13 +94,15 @@ class Crew(models.Model):
 	
 	#port they live in or prefer to fish out of, "regular" port
 	crew_home_port = models.CharField(max_length=32)
-	home_port_state = models.CharField(max_length=32)
 	#home_port_id = models.ForeignKey(Port, on_delete=models.CASCADE)
-	
+	home_port_state = models.CharField(max_length=32)
+	home_port_state_id = models.ForeignKey(State, on_delete=models.CASCADE)
+		
 	#port they may be in currently, if different than home port
 	crew_current_port = models.CharField(max_length=32)
-	current_port_state = models.CharField(max_length=32)
 	#current_port_id = models.ForeignKey(Port, on_delete=models.CASCADE)
+	current_port_state = models.CharField(max_length=32)
+	current_port_state_id = models.ForeignKey(State, on_delete=models.CASCADE)
 	
 	#years total of fishing experience
 	fishery_exp_years = models.SmallIntegerField()
