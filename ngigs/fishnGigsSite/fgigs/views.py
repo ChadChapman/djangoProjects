@@ -37,6 +37,8 @@ class IndexView(generic.ListView):
 #################################################################
 
 class FisheryAllIndexView(generic.ListView):
+	""" all fisheries in all states 
+	"""
 	#override the default template name
 	template_name = 'fgigs/fisheryallindex.html'
 	#override the autogen context var with this:
@@ -49,48 +51,249 @@ class FisheryAllIndexView(generic.ListView):
 #################################################################
 
 class FisheryPKIndexView(generic.ListView):
-	"""one fishery, filtered by primary key (self.id)
-	should return: list of all fisheries by PK, from all States """
+	"""one fishery, filtered by primary key (self.id), from all states 
+	"""
 	template_name = 'fgigs/fisherypkindex.html'
 	context_object_name = 'fishery_pk_list'
 	
-	def get_queryset(request, fishery_id):
+	def get_queryset(self):
 		""" should return all fisheries with provided PK for all states fishery
 		is listed in. url directing here should use named groups for capturing
 		kwargs. Primary Key should be 'fishery_id' """
-	try:
-		""" use the context object name here or are they unrealted? 
-		so this will be a list and need all results from all states?"""
-		#fishery_pk_list = get_object_or_404(Fishery, pk=fishery_id)
-		fishery = get_object_or_404(Fishery, pk=fishery_id)
-	except(KeyError, Fishery.DoesNotExist):
-		""" would rather flash an error message and go back to fisheryindexall.html
-		but for now can make error pages i guess.  error pages for not founds or
-		nothing listed situations """
-		return render(request, 'fgigs/fisherynotfound.html', {'fishery':fishery,
-			'error_message':"Fishery was not found.",
-			})
-	else:
-		""" so the try worked, now make sure the template has the queryset and 
-		renders it ocrrectly """
-		selected_crew.votes +=1
-		selected_crew.save()
-		#return HttpResponseRedirect after successful POST, prevent
-		#double posting if user hits Back btn
-		return HttpResponseRedirect(reverse('fgigs:results',
-		args = (fishery.id,)))
+		try:
+			""" get queryset for pk if possible, 
+			if not redirect to fishery not found page 
+			"""
+			pkquery = Fishery.objects.filter(pk=fishery_id)
+		except(KeyError, Fishery.DoesNotExist):
+			""" would rather flash an error message and go back to fisheryindexall.html
+			but for now can make error pages i guess.  error pages: for not founds or
+			nothing listed situations """
+			return render(request, 'fgigs/fisherynotfound.html', {
+				'error_message':"Fishery was not found.",
+				})
+		else:
+			""" so the try worked, now make sure the template has the queryset and 
+			renders it correctly.  
+			"""
+			#check if specific state_fishery (num of objects in queryset <= 1) ?
+			#if (pkquery.len()__lte=1): should maybe .exists() instead? of len()?
+			return pkquery 
 	
+	#~ def get_state_fisheries_list(self):
+		#~ """ return a list of the Fishery objects from the queryset
+		#~ each will be a state-specific fishery or state_fishery
+		#~ """	
+		#~ index_queryset_results = self.get_queryset(request, fishery_id)
+		#~ #order this by anything?
+		#~ return list(index_query_results)
+		
 #################################################################
 
-class FisheryPKStatePKIndexView(generic.ListView):
-	""" one fishery, in one state, both by pk or ids.  fishery_id and state_id
-	should both be captured from url """
+class FisheryStateAllIndexView(generic.ListView):
+	""" all fisheries in a single state. """
+	template_name = 'fgigs/fisherystateallindex.html'
+	context_object_name = 'fishery_state_all_list' #maybe list later?
 	
-	def get_queryset(request, fishery_id, state_id):
+	def get_queryset(self):
 		try:
-			
+			index_query = Fishery.objects.filter(fishery_state_id=state_id)
+		except(KeyError, EmptyResultSet):
+			return render(request, 'fgigs/fisherynotfound.html', {
+				'error_message':"No Fishery was found in that State.",
+				})
+		else:
+			return index_query
+		
+#################################################################
+
+class FisheryPKStateFKIndexView(generic.DetailView):
+	""" one fishery, in one state, both by pk or ids.  fishery_id and state_id
+	should both be captured from url. DetailView because no list to display a this time. 
+	"""
+	model = Fishery
+	template_name = 'fgigs/fisherystateindex.html'
+	context_object_name = 'fishery_state_detail' #maybe list later?
+	
+	def get_queryset(self):
+		try:
+			index_query = Fishery.objects.filter(pk=fishery_id, fishery_state_id=state_id)
 		except(KeyError, Fishery.DoesNotExist, State.DoesNotExist):
+			return render(request, 'fgigs/fisherynotfound.html', {
+				'error_message':"This Fishery in this State was not found.",
+				})
+		else:
+			return index_query
 			
+	def fishery_state_detail(request, fishery_id, state_id):
+		fishery_state_obj = get_object_or_404(Fishery, pk=fishery_id, 
+		fishery_state_id=state_id)
+		return render(request, 'fgigs/fisherystateindex.html', 
+		{'fishery_state_obj':fishery_state_obj})	 
+
+#################################################################
+
+class StateAllIndexView(generic.ListView):
+	""" all states 
+	"""
+	template_name = 'stateallindex.html'
+	context_object_name = 'state_all_list'
+	
+	def get_queryset(self):
+		try:
+			index_query = State.objects.all() 
+		except (EmptyResultSet):
+			return render(request, 'fgigs/statenotfound.html', {
+				'error_message':"State was not found.",
+				})
+		else:
+			return index_query 
+			
+	def get_state_list(self):
+		state_query_all = self.get_queryset
+		return list(state_query_all)	
+
+#################################################################
+
+class StateFisheryAllIndexView(generic.ListView):
+	""" all states in a fishery 
+	"""
+	template_name = 'statefisheryallindex.html'
+	context_object_name = 'state_fishery_all_list'
+	
+	def get_queryset(self):
+		try:
+			#each state need a list of all included fisheries
+			index_query = State.objects.filter() 
+		except (EmptyResultSet):
+			return render(request, 'fgigs/statenotfound.html', {
+				'error_message':"State was not found.",
+				})
+		else:
+			return index_query 
+			
+	def get_state_list(self):
+		state_query_all = self.get_queryset
+		return list(state_query_all)
+
+#################################################################
+
+class StateDetailView(generic.DetailView):
+	""" detailed view of a state 
+	"""
+	#~ template_name = 'statefisheryallindex.html'
+	#~ context_object_name = 'state_fishery_all_list'
+	
+	#~ def get_queryset(self):
+		#~ try:
+			#~ #each state need a list of all included fisheries
+			#~ index_query = State.objects.filter() 
+		#~ except (EmptyResultSet):
+			#~ return render(request, 'fgigs/statenotfound.html', {
+				#~ 'error_message':"State was not found.",
+				#~ })
+		#~ else:
+			#~ return index_query 
+			
+	#~ def get_state_list(self):
+		#~ state_query_all = self.get_queryset
+		#~ return list(state_query_all)
+
+#################################################################
+
+class CrewAllIndexView(generic.ListView):
+	template_name = 'crewallindex.html'
+	context_object_name = 'crew_all_list'
+	
+	def get_queryset(self):
+		try:
+			index_query = Crew.objects.all() 
+		except(EmptyResultSet):
+			return render(request, 'fgigs/crewnotfound.html', {
+				'error_message':"Crew was not found.",
+				})
+		else:
+			return index_query 
+			
+	def get_crew_list(self):
+		crew_query_all = self.get_queryset
+		return list(crew_query_all)	
+
+#################################################################
+
+class CrewFisheryAllIndexView(generic.ListView):
+	template_name = 'crewfisheryallindex.html'
+	context_object_name = 'crew_fishery_all_list'
+	
+	def get_queryset(self):
+		try:
+			index_query = Crew.objects.filter(crew_fishery=fishery_id)
+		except(KeyError, Fishery.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/crewfisherynotfound.html', {
+				'error_message':"No Crew in that Fishery was found.",
+				})
+		else:
+			return index_query
+
+#################################################################
+
+class CrewStateAllIndexView(generic.Listview):
+	""" all crew in a single state, should filter by both home_port and current_port
+	for crew listings, then return single set of all distincts """
+	template_name = 'crewstateallindex.html'
+	context_object_name = 'crew_state_all_list'
+	
+	def get_queryset(self):
+		try:
+			index_query = Crew.objects.filter(home_port_state=state_id | 
+			current_port_state = state_id)
+		except(KeyError, State.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/crewstatenotfound.html', {
+				'error_message':"No Crew in that State was found.",
+				})
+		else:
+			return index_query
+
+#################################################################
+
+class CrewFisheryStateAllIndexView(generic.Listview):
+	""" all crew in a fishery in a state, again crew should be filtered by home_port
+	OR current_port, as well as Fishery """
+	template_name = 'crewfisherystateallindex.html'
+	context_object_name = 'crew_fishery_state_all_list'
+	
+	def get_queryset(self):
+		try:
+			index_query = Crew.objects.filter(home_port_state=state_id | 
+			current_port_state = state_id, crew_fishery=fishery_id)
+		except(KeyError, EmptyResultSet):
+			return render(request, 'fgigs/crewfisherystatenotfound.html', {
+				'error_message':"No Crew in that Fishery in that State was found.",
+				})
+		else:
+			return index_query
+
+#################################################################
+
+class CrewDetailView(generic.DetailView):
+	""" detail view of a crew listing 
+	"""
+	
+	#~ template_name = 'crewfisherystateallindex.html'
+	#~ context_object_name = 'crew_fishery_state_all_list'
+	
+	#~ def get_queryset(self):
+		#~ try:
+			#~ index_query = Crew.objects.filter(home_port_state=state_id | 
+			#~ current_port_state = state_id, crew_fishery=fishery_id)
+		#~ except(KeyError, EmptyResultSet):
+			#~ return render(request, 'fgigs/crewfisherystatenotfound.html', {
+				#~ 'error_message':"No Crew in that Fishery in that State was found.",
+				#~ })
+		#~ else:
+			#~ return index_query
+
+#################################################################
 
 #generic.DetailView = display page of details of one object
 #generic.DetailView expects primary key as pk from URL

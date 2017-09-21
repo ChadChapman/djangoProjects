@@ -23,16 +23,22 @@ class State(models.Model):
 class Fishery(models.Model):
 	"""all relevant info for a specific fishery, changed from each state having 
 	own table to each Fishery having a list of names? keys? to States where each
-	Fishery is located"""
+	Fishery is located
+	actually going to do both state specific and general.  if the state_id_list
+	is of length = 1, it is a state_fishery. if length > 1 , it is an index_fishery
+	"""
 	fishery_name = models.CharField(max_length=50)
-	#fishery_state = models.CharField(max_length=50)
-	#fishery_state_id = models.ForeignKey(State, on_delete=models.CASCADE)
-	"""rather than the two fields above, going with a "list" of ints
+	fishery_state = models.CharField(max_length=50)
+	fishery_state_id = models.ForeignKey(State, on_delete=models.CASCADE)
+	"""rather than the two fields above, (actusally going ot use those for a min) 
+	going with a "list" of ints
 	representing the pk or ids of states where this fishery is located.
-	according to django docs, CommaSeperatedIntegerField is deprecated now, so: """
+	according to django docs, CommaSeperatedIntegerField is deprecated now, so: 
+	"""
 	try:
 		fishery_state_id_list = models.CharField(max_length=50, 
-		validators=[validate_comma_seperated_integer_list])
+		validators=[validate_comma_seperated_integer_list]) 
+		#above list can be an empty list for state sepcific fisheries
 	except(ValidationErr):
 		return render(request, 'fgigs/addfishery.html', 
 		{'fishery_name':fishery_name, 
