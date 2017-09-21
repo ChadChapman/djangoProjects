@@ -54,55 +54,75 @@ class FisheryPKIndexView(generic.ListView):
 	template_name = 'fgigs/fisherypkindex.html'
 	context_object_name = 'fishery_pk_list'
 	
-	def get_queryset(request, fishery_id):
+	def get_queryset(self):
 		""" should return all fisheries with provided PK for all states fishery
 		is listed in. url directing here should use named groups for capturing
 		kwargs. Primary Key should be 'fishery_id' """
 		try:
-			""" use the context object name here or are they unrealted? 
-			so this will be a list and need all results from all states?"""
-			#fishery_pk_list = get_object_or_404(Fishery, pk=fishery_id)
-			#index_fishery = get_object_or_404(Fishery, pk=fishery_id)
+			""" get queryset for pk if possible, 
+			if not redirect to fishery not found page 
+			"""
 			pkquery = Fishery.objects.filter(pk=fishery_id)
 		except(KeyError, Fishery.DoesNotExist):
 			""" would rather flash an error message and go back to fisheryindexall.html
 			but for now can make error pages i guess.  error pages: for not founds or
 			nothing listed situations """
-			return render(request, 'fgigs/fisherynotfound.html', {'fishery':fishery,
+			return render(request, 'fgigs/fisherynotfound.html', {
 				'error_message':"Fishery was not found.",
 				})
 		else:
 			""" so the try worked, now make sure the template has the queryset and 
-			renders it correctly.  Iter through the ints in the 
-			fishery_state_id_list and build a list of Fishery (one for each state) 
-			objects to pass to the template """
-			#check if specific state_fishery (num of objects in queryset <= 1)
-			if (pkquery.len()__=1):
-				#for each foreignKeyID in the field's list, get the Fishery object, append
-				for fkid in 
-				#get the state fishery with fishery_id and pkid
-				state_fishery = get_object_or_404(Fishery, pk=fishery_id, fkid=fishery_state_id)
-				
-			else:
-				return 	
-			#~ selected_crew.votes +=1
-			#~ selected_crew.save()
-			#~ #return HttpResponseRedirect after successful POST, prevent
-			#~ #double posting if user hits Back btn
-			#~ return HttpResponseRedirect(reverse('fgigs:results',
-			#~ args = (fishery.id,)))
+			renders it correctly.  
+			"""
+			#check if specific state_fishery (num of objects in queryset <= 1) ?
+			#if (pkquery.len()__lte=1):
+			return pkquery 
 	
+	def get_state_fisheries_list(self):
+		""" return a list of the Fishery objects from the queryset
+		each will be a state-specific fishery or state_fishery
+		"""	
+		index_queryset_results = self.get_queryset(request, fishery_id)
+		#order this by anything?
+		return list(index_query_results)
+		
 #################################################################
 
-class FisheryPKStatePKIndexView(generic.ListView):
+class FisheryPKStateFKIndexView(generic.DetailView):
 	""" one fishery, in one state, both by pk or ids.  fishery_id and state_id
-	should both be captured from url """
+	should both be captured from url. DetailView because no list to display a this time. """
+	model = Fishery
+	template_name = 'fgigs/fisherystateindex.html'
+	context_object_name = 'fishery_state_detail' #maybe list later?
 	
-	def get_queryset(request, fishery_id, state_id):
+	def get_queryset(self):
 		try:
-			
+			index_query = Fishery.objects.filter(pk=fishery_id, fishery_state_id=state_id)
 		except(KeyError, Fishery.DoesNotExist, State.DoesNotExist):
+			return render(request, 'fgigs/fisherynotfound.html', {
+				'error_message':"This Fishery in this State was not found.",
+				})
+		else:
+			return index_query
 			
+	def fishery_state_detail(request, fishery_id, state_id):
+		fishery_state_obj = get_object_or_404(Fishery, pk=fishery_id, 
+		fishery_state_id=state_id)
+		return render(request, 'fgigs/fisherystateindex.html', 
+		{'fishery_state_obj':fishery_state_obj})	 
+
+#################################################################
+
+class StateAllIndexView(generic.ListView):
+	template_name = 'stateallindex.html'
+	context_object_name = 'state_all_list'
+	
+	def get_queryset(self):
+		return State.objects.all()
+		
+	
+
+#################################################################
 
 #generic.DetailView = display page of details of one object
 #generic.DetailView expects primary key as pk from URL
