@@ -278,20 +278,27 @@ class CrewFisheryStateAllIndexView(generic.Listview):
 class CrewDetailView(generic.DetailView):
 	""" detail view of a crew listing 
 	"""
+	model = Crew
+	template_name = 'fgigs/crewdetail/html'
 	
-	#~ template_name = 'crewfisherystateallindex.html'
-	#~ context_object_name = 'crew_fishery_state_all_list'
+	def get_queryset(self):
+		try:
+			crew_by_pkey = Crew.objects.filter(pk=crew_id)
+		except(KeyError, Crew.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/crewdetailnotfound.html', {
+			'error_message':"No matching Crew listing was found.",
+			})
+		else:
+			return crew_by_pkey
 	
-	#~ def get_queryset(self):
-		#~ try:
-			#~ index_query = Crew.objects.filter(home_port_state=state_id | 
-			#~ current_port_state = state_id, crew_fishery=fishery_id)
-		#~ except(KeyError, EmptyResultSet):
-			#~ return render(request, 'fgigs/crewfisherystatenotfound.html', {
-				#~ 'error_message':"No Crew in that Fishery in that State was found.",
-				#~ })
-		#~ else:
-			#~ return index_query
+	def detail(request, crew_id):
+		crew_by_id = get_object_or_404(Crew, pk=crew_id)
+		return render(request, 'fgigs/crewdetail.html', {'crew_by_id':crew_by_id})
+			
+#################################################################
+# add new crew listing view
+# add new fishery category view
+# add new state category view
 
 #################################################################
 
