@@ -24,21 +24,27 @@ urlpatterns = [
 	#url(r'^$', views.index, name='index'),
 	url(r'^$', views.IndexView.as_view(), name='index'),
 	
-	# /fgigs/5/
-	#url(r'^(?P<fishery_id>[0-9]+)/$', views.detail, name='detail'),
-	#url(r'^(?P<pk>[0-9]+)/$', views.DetailView.as_view(), name='detail'),
-	
 	# /fgigs/fisheries/all/
-	# show index of all fisheries
+	# show index of all fisheries, direct link from index page button
 	url(r'^fisheries/all/$', views.FisheryAllIndexView.as_view(), name='fisheryallindex'),
-			
+	
 	# /fgigs/fisheries/3/
-	# show fishery with pk=3, all states included
-	url(r'^fisheries/(?P<fishery_id>[0-9]+)/$', views.FisheryPKView.as_view(), name='fisherypkindex'),
+	# show fishery with pk=3, all states included, states separated? by color or ?
+	url(r'^fisheries/(?P<fishery_id>[0-9]+)/$', views.FisheryPKView.as_view(), name='fisherypk'),
 	
 	# /fgigs/fisheries/3/crew/
 	# show crew ads for fishery where fishery pk=3
 	url(r'^fisheries/(?P<fishery_ids>[0-9]+)/crew/$', views.FisheryPKCrewView.as_view(), name='fisherypkcrew'),
+	
+	# /fgigs/5/
+	#url(r'^(?P<fishery_id>[0-9]+)/$', views.detail, name='detail'),
+	#url(r'^(?P<pk>[0-9]+)/$', views.DetailView.as_view(), name='detail'),
+	
+	
+			
+	
+	
+	
 		
 	# /fgigs/fisheries/3/states/2/
 	# show fishery with pk=3, in state with pk = 2
