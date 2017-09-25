@@ -20,16 +20,22 @@ class State(models.Model):
 	def __str__(self):
 		return name_abbreviation
 
+class MetaFishery(models.Model):
+	""" broader fishery class to span different states.  
+	"""
+	fishery_name = models.CharField(max_length=50) # eg Dungeness Crab
+	fishery_states = models.CharField(max_length=300) #state names list, should be comma seperated, will get parsed
+	fishery_ids = models.CharField(max_length=50)# state pk list as comma separated list of pk ints
+	#be sure to add ways to access these fields in whatever view this ends up in/as	
+
 class Fishery(models.Model):
-	"""all relevant info for a specific fishery, changed from each state having 
-	own table to each Fishery having a list of names? keys? to States where each
-	Fishery is located
-	actually going to do both state specific and general.  if the state_id_list
-	is of length = 1, it is a state_fishery. if length > 1 , it is an index_fishery
+	"""all relevant info for a specific fishery, in a specific state.
+	actually going to do both state specific and general. this is the state-specific
+	class, MetaFishery will be the broader class that spans states.
 	"""
 	fishery_name = models.CharField(max_length=50) # eg Oregon Dungeness Crab, state specific
-	fishery_type = models.CharField(max_length=50) # eg Dungeness Crab, meta fishery name
-	fishery_type_id = models.IntegerField() # may become an fk if FisheryType model is created 
+	fishery_type = models.CharField(max_length=50) # eg Dungeness Crab, meta fishery name? redundant?
+	fishery_type_id = models.ForeignKey(MetaFishery, on_delete=models.CASCADE)  
 	fishery_state = models.CharField(max_length=50)
 	fishery_state_id = models.ForeignKey(State, on_delete=models.CASCADE)
 	"""rather than the two fields above, (actusally going ot use those for a min) 
