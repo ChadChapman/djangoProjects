@@ -3,10 +3,10 @@
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.11/topics/http/urls/
 Examples:
-Function views
+Function views - !not used!
     1. Add an import:  from my_app import views
     2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
-Class-based views
+Class-based views - !is used!
     1. Add an import:  from other_app.views import Home
     2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
 Including another URLconf
@@ -22,33 +22,70 @@ urlpatterns = [
 	#leading slash is implied and does not have to be added in urls
 	# /fgigs/
 	#url(r'^$', views.index, name='index'),
-	url(r'^$', views.IndexView.as_view(), name='index'),
+	url(r'^$', views.IndexView.as_view(), name='index')
 	
+	##################################################################
+	""" fishery routings
+	"""
 	# /fgigs/fisheries/all/
 	# show index of all fisheries, direct link from index page button
-	url(r'^fisheries/all/$', views.FisheryAllIndexView.as_view(), name='fisheryallindex'),
+	url(r'^fisheries/all/$', views.FisheryAllIndexView.as_view(), name='fisheryallindex')
 	
-	# /fgigs/fisheries/3/
-	# show fishery with pk=3, all states included, states separated? by color or ?
-	url(r'^fisheries/(?P<fishery_id>[0-9]+)/$', views.FisheryPKView.as_view(), name='fisherypk'),
+	# /fgigs/fisheries/3/states/
+	# show all states for fishery type where fishery type = 3
+	url(r'^fisheries/(?P<type_id>[0-9]+)/states/$', views.FisheryAllStatesView.as_view(), 
+	name='fisheryallstates')
 	
-	# /fgigs/fisheries/3/crew/
-	# show crew ads for fishery where fishery pk=3
-	url(r'^fisheries/(?P<fishery_ids>[0-9]+)/crew/$', views.FisheryPKCrewView.as_view(), name='fisherypkcrew'),
+	#~ # /fgigs/fisheries/3/crew/
+	#~ # show crew ads for fishery where fishery pk=3
+	#~ url(r'^fisheries/(?P<fishery_id>[0-9]+)/crew/$', views.FisheryPKCrewView.as_view(), 
+	#~ name='fisherypkcrew')
+	
+	
+	
+	# /fgigs/fisheries/3/states/2/
+	# show fishery with pk=3, in state with pk = 2
+	url(r'^fisheries/(?P<fishery_id>[0-9]+)/states/(?P<state_id>[0-9]+)/$', 
+	views.FisheryPKStatePKView.as_view(), name='fisherypkstatepk'),
+		
+	# /fgigs/fisheries/3/states/2/crew/
+	# show fishery with pk=3, in state with pk = 2
+	url(r'^fisheries/(?P<fishery_id>[0-9]+)/states/(?P<state_id>[0-9]+)/crew/$', 
+	views.FisheryPKStatePKCrewView.as_view(), name='fisherypkstatepkcrew'),
+	
+	# /fgigs/fisheries/3/details/
+	#maybe should be fishery detail view instead
+	# show fishery with pk=3, detail view
+	url(r'^fisheries/(?P<fishery_id>[0-9]+)/details/$', views.FisheryDetailView.as_view(), name='fisherydetail')
+	
+	##################################################################
+	""" state routings
+	"""
+	# /fgigs/states/all/
+	# show index of all states, direct link from index page button
+	url(r'^states/all/$', views.StateAllIndexView.as_view(), name='stateallindex')
+	
+	# /fgigs/states/3/
+	# maybe this should be detail view for state instead?
+	# show state with pk = 3, view should have all state's fisheries, fisheries separated by?
+	url(r'^states/(?P<state_id>[0-9]+)/$', views.StatePKView.as_view(), name='statepk')
+	
+	# /fgigs/states/3/crew/
+	# show crew ads for state where state pk = 3, 
+	url(r'^states/(?P<state_id>[0-9]+)/crew/$', views.StatePKCrewView.as_view(), name='statepkcrew')
+	
+	# /fgigs/states/3/fisheries/
+	# show all fisheries in state with state pk=3, 
+	url(r'^fisheries/(?P<fishery_id>[0-9]+)/states/(?P<state_id>[0-9]+)/$', 
+	views.FisheryPKStatePKView.as_view(), name='fisherypkstatepk'),
+	
+	##################################################################
+	""" crew routings
+	"""
 	
 	# /fgigs/5/
 	#url(r'^(?P<fishery_id>[0-9]+)/$', views.detail, name='detail'),
 	#url(r'^(?P<pk>[0-9]+)/$', views.DetailView.as_view(), name='detail'),
-	
-	
-			
-	
-	
-	
-		
-	# /fgigs/fisheries/3/states/2/
-	# show fishery with pk=3, in state with pk = 2
-	url(r'^fisheries/(?P<fishery_id>[0-9]+)/states/(?P<state_id>[0-9]+)/$', views.FisheryPKStatePKView.as_view(), name='fisherypkindex'),
 		
 	# /fgigs/fisheries/state/2/?
 	# show fisheries in state where state has id or pk=2

@@ -28,7 +28,10 @@ class IndexView(generic.ListView):
 	no querysets needed? template should just have buttons and nothing more needed here?
 	"""	
 	
-#ListView = display a list of objects
+""" ListView = display a list of objects.
+there may be some overlap with displaying states, fisheries and ports when ports are added
+i am leaving redundancy for now for ease of debugging and simplified logic
+"""
 #################################################################
 # Fishery views: all fisheries in db, 
 #				all fisheries in a state,
@@ -50,6 +53,40 @@ class FisheryAllIndexView(generic.ListView):
 		#should return all fisheries in db
 		return Fishery.objects.all()
 	
+#################################################################
+
+class FisheryAllStatesView(generic.ListView):
+	""" all states in a single fishery. """
+	template_name = 'fgigs/fisheryallstatesindex.html'
+	context_object_name = 'fishery_all_states_list' 
+	""" each fishery has its own state, so get all fisheries with the fishery_id,
+	then get the states out of those fisheries. This is just listing the states so no
+	need to return actual State objects, names should be fine? then link names to btns
+	on the template for each state's details? or state fishery details?
+	"""
+	def get_queryset(self):
+		try:
+			fishery_set = Fishery.objects.filter(fishery_type_id=_id)
+		except(KeyError, Fishery.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/fisherystatesnotfound.html', {
+				'error_message':"No States were found for that Fishery.",
+				})
+		else:
+			return fishery_set
+	
+	def get_state_list(request, type_id):
+		""" here get the State names out of the fisheries returned from the queryset.
+		iterate through queryset and add State names to list
+		"""
+		state_list = []
+		query_return = self.get_queryset(self)
+		for fishery in query_return:
+			state_name = fishery.fishery_state
+			state_list += state_name
+		
+		return state_list
+	
+		
 #################################################################
 
 class FisheryPKIndexView(generic.ListView):
@@ -99,9 +136,6 @@ class FisheryPKCrewView(generic.ListView):
 			"""
 			crew_query = Crew.objects.filter(crew_fishery=fishery_id)
 		except(KeyError, Crew.DoesNotExist, EmptyResultSet):
-			""" would rather flash an error message and go back to fisheryindexall.html
-			but for now can make error pages i guess.  error pages: for not founds or
-			nothing listed situations """
 			return render(request, 'fgigs/fisherycrewnotfound.html', {
 				'error_message':"Crew in that Fishery was not found.",
 				})
@@ -115,22 +149,7 @@ class FisheryPKCrewView(generic.ListView):
 	"""	
 #################################################################
 
-class FisheryStateAllIndexView(generic.ListView):
-	""" all fisheries in a single state. """
-	template_name = 'fgigs/fisherystateallindex.html'
-	context_object_name = 'fishery_state_all_list' #maybe list later?
-	
-	def get_queryset(self):
-		try:
-			index_query = Fishery.objects.filter(fishery_state_id=state_id)
-		except(KeyError, EmptyResultSet):
-			return render(request, 'fgigs/fisherynotfound.html', {
-				'error_message':"No Fishery was found in that State.",
-				})
-		else:
-			return index_query
-		
-#################################################################
+
 
 class FisheryPKStateFKIndexView(generic.DetailView):
 	""" one fishery, in one state, both by pk or ids.  fishery_id and state_id
@@ -182,6 +201,49 @@ class StateAllIndexView(generic.ListView):
 		state_query_all = self.get_queryset
 		return list(state_query_all)	
 
+#################################################################
+
+class StatePKView(generic.ListView):
+	"""one state, filtered by primary key (self.id), includes all fisheries in state 
+	"""
+	template_name = 'fgigs/statepk.html'
+	context_object_name = 'state_pk_list'
+	
+	def get_queryset(self):
+		try:			
+			pkquery = Fishery.objects.filter(fishery_state_id=state_id)
+		except(KeyError, Fishery.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/statenotfound.html', {
+				'error_message':"That State selection was not found.",
+				})
+		else:
+			return pkquery 
+	""" how to spearate out the different state fisheries in the returned queryset
+		should they display differently? different highlights? or a choice to search by fishery?
+	"""	
+#################################################################
+
+class StatePKCrewView(generic.ListView):
+	"""all crew listings, for all fisheries, for one state, 
+	filtered by state primary key (self.id) 
+	"""
+	template_name = 'fgigs/statepkcrew.html'
+	context_object_name = 'state_pk_crew_list'
+	
+	def get_queryset(self):
+		try:	#put these two query sets into a list? keep as querysets in a dict?		
+			home_crew_query = Crew.objects.filter(home_port_state_id=state_id)
+			current_crew_query = Crew.objects.filter(home_port_state_id=state_id)
+		except(KeyError, Crew.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/statecrewnotfound.html', {
+				'error_message':"Crew for that State selection was not found.",
+				})
+		else:
+			pkquery = home_crew_query + current_crew_query
+			return pkquery 
+	""" for now perhaps turn querysets to lists, don't think much beyond list functionality
+	is needed right now.
+	"""	
 #################################################################
 
 class StateFisheryAllIndexView(generic.ListView):
