@@ -12,7 +12,7 @@ class State(models.Model):
 	state_name = models.CharField(max_length=30)
 	state_nation = models.CharField(max_length=30)
 	name_abbreviation = models.CharField(max_length=6)
-	#fisheries
+	#fisheries - some list of fishery ids? names?
 	#ports
 	#crew
 	#gigs
@@ -27,7 +27,9 @@ class Fishery(models.Model):
 	actually going to do both state specific and general.  if the state_id_list
 	is of length = 1, it is a state_fishery. if length > 1 , it is an index_fishery
 	"""
-	fishery_name = models.CharField(max_length=50)
+	fishery_name = models.CharField(max_length=50) # eg Oregon Dungeness Crab, state specific
+	fishery_type = models.CharField(max_length=50) # eg Dungeness Crab, meta fishery name
+	fishery_type_id = models.IntegerField() # may become an fk if FisheryType model is created 
 	fishery_state = models.CharField(max_length=50)
 	fishery_state_id = models.ForeignKey(State, on_delete=models.CASCADE)
 	"""rather than the two fields above, (actusally going ot use those for a min) 
