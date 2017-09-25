@@ -6,35 +6,36 @@ from django.views import generic
 #from django.template import loader
 from django.utils import timezone
 
-# Create your views here.
-#switched to class based generic views now
-#ListView = display a list of objects
+# this is the class-based-views way of doing it, with generic views
+#################################################################
+"""
+general index or landing page of the site, currently should offer to see
+Crew by state, fishery, or both
++ button for add new Crew
++ button for add new Fishery (admin only)
++ button for add new State (admin only)
+? not sure about detail views for state and fishery? buttons? 
+"""
 class IndexView(generic.ListView):
 	#generic.ListView defaults to 'appName/modelName_list.html'
 	#this overrides the default
 	template_name = 'fgigs/index.html'
 	#generic view autogens context var: fishery_list
 	#overrides default, but could change template instead
-	context_object_name = 'latest_fishery_list'
-	#i think this actual index should just be the search by port or by fishery
-	#landing page, with buttons for create a new ad for either
-	def get_queryset(self):
-		#return last five updated (published) fisheries
-		return Fishery.objects.filter(updated_date__lte=
-		timezone.now()).order_by('-pub_date')[:5]
-		#return Fishery.objects.order_by('-pub_date')[:5]
-		
-#~ def index(request):
-	#~ latest_fishery_list = Fishery.objects.order_by('-pub_date')[:5]
-	#~ template = loader.get_template('fgigs/index.html')
-	#~ context = {'latest_fishery_list': latest_fishery_list,}
-	#~ return render(request, 'fgigs/index.html', context)
-	#return HttpResponse(template.render(context,request))
-	#output = ','.join([f.description_text for f in latest_fishery_list])
-	#return HttpResponse(output)
-	#return HttpResponse("index page!")
+	# ? context_object_name = 'latest_fishery_list' ?
+	"""i think index page should just be: btn-search by state, btn-or by fishery,
+	with buttons for create a crew ad for either state or fishery
+	no querysets needed? template should just have buttons and nothing more needed here?
+	"""	
 	
+#ListView = display a list of objects
 #################################################################
+# Fishery views: all fisheries in db, 
+#				all fisheries in a state,
+#				all fisheries with crew?
+#				all crew for specific fishery in a specific state
+#				individual fishery details,
+#?
 
 class FisheryAllIndexView(generic.ListView):
 	""" all fisheries in all states 
@@ -132,9 +133,13 @@ class FisheryPKStateFKIndexView(generic.DetailView):
 		{'fishery_state_obj':fishery_state_obj})	 
 
 #################################################################
-
+# State views: 	all states in db, 
+#				all states in each fishery,
+#				individual state details,
+#? all states for each crew?
+ 
 class StateAllIndexView(generic.ListView):
-	""" all states 
+	""" all states found in the db
 	"""
 	template_name = 'stateallindex.html'
 	context_object_name = 'state_all_list'
@@ -181,25 +186,30 @@ class StateFisheryAllIndexView(generic.ListView):
 class StateDetailView(generic.DetailView):
 	""" detailed view of a state 
 	"""
-	#~ template_name = 'statefisheryallindex.html'
-	#~ context_object_name = 'state_fishery_all_list'
+	model = State
+	template_name = 'statedetail.html'
 	
-	#~ def get_queryset(self):
-		#~ try:
-			#~ #each state need a list of all included fisheries
-			#~ index_query = State.objects.filter() 
-		#~ except (EmptyResultSet):
-			#~ return render(request, 'fgigs/statenotfound.html', {
-				#~ 'error_message':"State was not found.",
-				#~ })
-		#~ else:
-			#~ return index_query 
-			
-	#~ def get_state_list(self):
-		#~ state_query_all = self.get_queryset
-		#~ return list(state_query_all)
+	def get_queryset(self):
+		try:
+			state_by_pkey = State.objects.filter(id = state_id)
+		except(KeyError, State.DoesNotExist, ExptyResultSet):
+			 return render(request, 'fgigs/statedetailnotfound.html', {
+				'error_message':"The details for that State were not found.",
+				})
+		else:
+			return state_by_pkey
+					
+	def detail(request, state_id):
+		state_by_id = get_object_or_404(State, pk=state_id)
+		return render(request, 'fgigs/stateetail.html', {'state_by_id':state_by_id})
 
 #################################################################
+# Crew views: 	all crew in db, 
+#				all crew in each fishery,
+#				all crew in each state,
+#				all crew in a fishery in a state
+#				individual crew details,
+#?
 
 class CrewAllIndexView(generic.ListView):
 	template_name = 'crewallindex.html'
@@ -301,6 +311,32 @@ class CrewDetailView(generic.DetailView):
 # add new state category view
 
 #################################################################
+
+# this is the class-based-views way of doing it
+class IndexView(generic.ListView):
+	#generic.ListView defaults to 'appName/modelName_list.html'
+	#this overrides the default
+	template_name = 'fgigs/index.html'
+	#generic view autogens context var: fishery_list
+	#overrides default, but could change template instead
+	context_object_name = 'latest_fishery_list'
+	#i think this actual index should just be the search by port or by fishery
+	#landing page, with buttons for create a new ad for either
+	def get_queryset(self):
+		#return last five updated (published) fisheries
+		return Fishery.objects.filter(updated_date__lte=
+		timezone.now()).order_by('-pub_date')[:5]
+		#return Fishery.objects.order_by('-pub_date')[:5]
+		
+#~ def index(request): this is the non-class-based views way of doing it
+	#~ latest_fishery_list = Fishery.objects.order_by('-pub_date')[:5]
+	#~ template = loader.get_template('fgigs/index.html')
+	#~ context = {'latest_fishery_list': latest_fishery_list,}
+	#~ return render(request, 'fgigs/index.html', context)
+	#return HttpResponse(template.render(context,request))
+	#output = ','.join([f.description_text for f in latest_fishery_list])
+	#return HttpResponse(output)
+	#return HttpResponse("index page!")
 
 #generic.DetailView = display page of details of one object
 #generic.DetailView expects primary key as pk from URL
