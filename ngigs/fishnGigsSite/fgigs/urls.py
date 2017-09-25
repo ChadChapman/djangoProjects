@@ -85,7 +85,22 @@ urlpatterns = [
 	"""
 	##################################################################
 	
+	# /fgigs/crew/new/  make new crew listing
+	url(r'^crew/new/$',	views.CrewNewView.as_view(), name='crewnew')
 	
+	# /fgigs/crew/active/index/ ? see all live crew listings
+	url(r'^crew/active/index/$', views.CrewActiveIndexView.as_view(), name='crewactiveindex')
+	
+	# /fgigs/crew/search/fishery/2/  look for crew in metafishery pk = 2
+	url(r'^crew/search/fishery/(?P<metafishery_id>[0-9]+)/$', views.CrewMetaFisheryIndexView.as_view(),
+	 name='crewmetafisheryindex')
+	
+	# /fgigs/crew/search/state/4/ look for crew in state pk = 4
+	url(r'^crew/search/state/(?P<state_id>[0-9]+)/$', views.CrewStateIndexView.as_view(),
+	 name='crewstateindex')
+	
+	# /fgigs/crew/search/state/4/fishery/3/ look for crew in state pk = 4, metafishery pk = 3
+	#pretty redundant just need a redirect?
 	
 	##################################################################
 	# /fgigs/5/
