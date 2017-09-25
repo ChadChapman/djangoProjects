@@ -36,6 +36,7 @@ class IndexView(generic.ListView):
 #				all crew for specific fishery in a specific state
 #				individual fishery details,
 #?
+#################################################################
 
 class FisheryAllIndexView(generic.ListView):
 	""" all fisheries in all states 
@@ -54,7 +55,7 @@ class FisheryAllIndexView(generic.ListView):
 class FisheryPKIndexView(generic.ListView):
 	"""one fishery, filtered by primary key (self.id), from all states 
 	"""
-	template_name = 'fgigs/fisherypkindex.html'
+	template_name = 'fgigs/fisherypk.html'
 	context_object_name = 'fishery_pk_list'
 	
 	def get_queryset(self):
@@ -66,7 +67,7 @@ class FisheryPKIndexView(generic.ListView):
 			if not redirect to fishery not found page 
 			"""
 			pkquery = Fishery.objects.filter(pk=fishery_id)
-		except(KeyError, Fishery.DoesNotExist):
+		except(KeyError, Fishery.DoesNotExist, EmptyResultSet):
 			""" would rather flash an error message and go back to fisheryindexall.html
 			but for now can make error pages i guess.  error pages: for not founds or
 			nothing listed situations """
@@ -77,18 +78,41 @@ class FisheryPKIndexView(generic.ListView):
 			""" so the try worked, now make sure the template has the queryset and 
 			renders it correctly.  
 			"""
-			#check if specific state_fishery (num of objects in queryset <= 1) ?
-			#if (pkquery.len()__lte=1): should maybe .exists() instead? of len()?
 			return pkquery 
+	""" how to spearate out the different state fisheries in the returned queryset
+		should they display differently? different states highlighted? or a choice to search by state?
+	"""	
+#################################################################
+
+class FisheryPKCrewView(generic.ListView):
+	"""all crew listings for one fishery, filtered by primary key (self.id), from all states 
+	"""
+	template_name = 'fgigs/fisherypkcrew.html'
+	context_object_name = 'fishery_pk_crew_list'
 	
-	#~ def get_state_fisheries_list(self):
-		#~ """ return a list of the Fishery objects from the queryset
-		#~ each will be a state-specific fishery or state_fishery
-		#~ """	
-		#~ index_queryset_results = self.get_queryset(request, fishery_id)
-		#~ #order this by anything?
-		#~ return list(index_query_results)
-		
+	def get_queryset(self):
+		""" should return all crew listings for all fisheries with provided PK for all states.
+		Primary Key should be 'crew_fishery' """
+		try:
+			""" get queryset for pk if possible, 
+			if not redirect to no crew in that fishery found page 
+			"""
+			crew_query = Crew.objects.filter(crew_fishery=fishery_id)
+		except(KeyError, Crew.DoesNotExist, EmptyResultSet):
+			""" would rather flash an error message and go back to fisheryindexall.html
+			but for now can make error pages i guess.  error pages: for not founds or
+			nothing listed situations """
+			return render(request, 'fgigs/fisherycrewnotfound.html', {
+				'error_message':"Crew in that Fishery was not found.",
+				})
+		else:
+			""" so the try worked, now make sure the template has the queryset and 
+			renders it correctly.  
+			"""
+			return crew_query 
+	""" how to spearate out the different state fisheries in the returned queryset
+		should they display differently? different states highlighted? or a choice to search by state?
+	"""	
 #################################################################
 
 class FisheryStateAllIndexView(generic.ListView):
