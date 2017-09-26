@@ -131,6 +131,7 @@ class Crew(models.Model):
 	get_latest_by = "crew_ad_created"
 	#the amount of time user selected their ad to run, in days eg: 3,5,7
 	crew_ad_runtime = models.IntegerField()
+	crew_ad_active = models.NullBooleanField(default=True)#gets changed to false when time expires
 	
 	#fisheries crew has most experience in
 	fishery_exp_1 = models.CharField(max_length=50)

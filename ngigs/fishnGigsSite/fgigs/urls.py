@@ -86,15 +86,18 @@ urlpatterns = [
 	"""
 	##################################################################
 	
+	# /fgigs/crew/all/  all crew listings, expired and active (admin only)
+	url(r'^crew/all/$',	views.CrewAllIndexView.as_view(), name='crewallindex')
+	
 	# /fgigs/crew/new/  make new crew listing
 	url(r'^crew/new/$',	views.CrewNewView.as_view(), name='crewnew')
 	
-	# /fgigs/crew/active/index/ ? see all live crew listings
-	url(r'^crew/active/index/$', views.CrewActiveIndexView.as_view(), name='crewactiveindex')
+	# /fgigs/crew/active/ see all live crew listings
+	url(r'^crew/active/$', views.CrewActiveIndexView.as_view(), name='crewactiveindex')
 	
 	# /fgigs/crew/search/fishery/2/  look for crew in metafishery pk = 2
-	url(r'^crew/search/fishery/(?P<metafishery_id>[0-9]+)/$', views.CrewMetaFisheryIndexView.as_view(),
-	 name='crewmetafisheryindex')
+	url(r'^crew/search/fishery/(?P<metafishery_id>[0-9]+)/$', views.CrewMetaFisheryAllView.as_view(),
+	 name='crewmetafisheryall')
 	
 	# /fgigs/crew/search/state/4/ look for crew in state pk = 4
 	url(r'^crew/search/state/(?P<state_id>[0-9]+)/$', views.CrewStateIndexView.as_view(),
