@@ -42,23 +42,44 @@ i am leaving redundancy for now for ease of debugging and simplified logic
 #################################################################
 
 class FisheryAllIndexView(generic.ListView):
-	""" all fisheries in all states 
+	""" all meta fisheries types in all states, state specific is handled below
+	these should be by type_id and  
 	"""
 	#override the default template name
-	template_name = 'fgigs/fisheryallindex.html'
+	template_name = 'fgigs/metafisheryallindex.html'
 	#override the autogen context var with this:
-	context_object_name = 'fishery_all_list'
+	context_object_name = 'metafishery_all_list'
 	
 	def get_queryset(self):
-		#should return all fisheries in db
-		return Fishery.objects.all()
+		# should return all fisheries in db, it should be meta types, 
+		# eg Salmon, Tuna, Crab and not state specific
+		return MetaFishery.objects.all()
 	
 #################################################################
 
-class FisheryAllStatesView(generic.ListView):
-	""" all states in a single fishery. """
-	template_name = 'fgigs/fisheryallstatesindex.html'
-	context_object_name = 'fishery_all_states_list' 
+class MetaFisheryDetailView(generic.DetailView):
+	""" one fishery, in all states 
+	"""
+	model = MetaFishery
+	template_name = 'fgigs/metafisherydetail.html'
+	context_object_name = 'metafishery_detail' 
+	
+	def get_queryset(self):
+		try:
+			metafishery_query = MetaFishery.objects.filter(id=metafishery_id)
+		except(KeyError, MetaFishery.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/metafisherynotfound.html', {
+				'error_message':"No details for that Fishery were found.",
+				})
+		else:
+			return metafishery_query
+		
+#################################################################
+
+class MetaFisheryAllStatesView(generic.ListView):
+	""" all states in a single metafishery. """
+	template_name = 'fgigs/metafisheryallstates.html'
+	context_object_name = 'metafishery_all_states_list' 
 	""" each fishery has its own state, so get all fisheries with the fishery_id,
 	then get the states out of those fisheries. This is just listing the states so no
 	need to return actual State objects, names should be fine? then link names to btns
@@ -75,18 +96,57 @@ class FisheryAllStatesView(generic.ListView):
 			return fishery_set
 	
 	def get_state_list(request, type_id):
-		""" here get the State names out of the fisheries returned from the queryset.
+		""" here get the State names out of the metafisheries returned from the queryset.
 		iterate through queryset and add State names to list
 		"""
-		state_list = []
 		query_return = self.get_queryset(self)
-		for fishery in query_return:
-			state_name = fishery.fishery_state
-			state_list += state_name
-		
+		#now make a list from queryset with a split() on the commas
+		states_list = query_return.fishery_states.split(",")
 		return state_list
 	
-		
+#################################################################
+
+class MetaFisheryAllCrewView(generic.ListView):
+	""" all crew in a single metafishery. """
+	template_name = 'fgigs/metafisheryallcrew.html'
+	context_object_name = 'metafishery_all_crew_list' 
+	
+	def get_queryset(self):
+		try:
+			crew_set = Crew.objects.filter(crew_fishery_type_id=metafishery_id)
+		except(KeyError, Fishery.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/metafisherycrewnotfound.html', {
+				'error_message':"No Crew were found for that Fishery.",
+				})
+		else:
+			return crew_set
+			
+#################################################################
+
+class FisheryPKStateFKIndexView(generic.DetailView):
+	""" one fishery, in one state, both by pk or ids.  type_id for fishery and state_id
+	should both be captured from url. DetailView because no list to display a this time. 
+	"""
+	model = Fishery
+	template_name = 'fgigs/fisherystatedetail.html'
+	context_object_name = 'fishery_state_detail' 
+	
+	def get_queryset(self):
+		try:
+			fishery_query = Fishery.objects.filter(fishery_type_id=type_id, fishery_state_id=state_id)
+		except(KeyError, Fishery.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/fisherystatenotfound.html', {
+				'error_message':"No details for this Fishery in this State were found.",
+				})
+		else:
+			return fishery_query
+	#aren't these two methods (above and below) doing basically the same thing?		
+	def get_fishery_state_detail(request, type_id, state_id):
+		fishery_state_obj = get_object_or_404(Fishery, fishery_type_id=type_id, 
+		fishery_state_id=state_id)
+		return render(request, 'fgigs/fisherystatedetail.html', 
+		{'fishery_state_obj':fishery_state_obj})	 
+
 #################################################################
 
 class FisheryPKIndexView(generic.ListView):
@@ -151,35 +211,12 @@ class FisheryPKCrewView(generic.ListView):
 
 
 
-class FisheryPKStateFKIndexView(generic.DetailView):
-	""" one fishery, in one state, both by pk or ids.  fishery_id and state_id
-	should both be captured from url. DetailView because no list to display a this time. 
-	"""
-	model = Fishery
-	template_name = 'fgigs/fisherystateindex.html'
-	context_object_name = 'fishery_state_detail' #maybe list later?
-	
-	def get_queryset(self):
-		try:
-			index_query = Fishery.objects.filter(pk=fishery_id, fishery_state_id=state_id)
-		except(KeyError, Fishery.DoesNotExist, State.DoesNotExist):
-			return render(request, 'fgigs/fisherynotfound.html', {
-				'error_message':"This Fishery in this State was not found.",
-				})
-		else:
-			return index_query
-			
-	def fishery_state_detail(request, fishery_id, state_id):
-		fishery_state_obj = get_object_or_404(Fishery, pk=fishery_id, 
-		fishery_state_id=state_id)
-		return render(request, 'fgigs/fisherystateindex.html', 
-		{'fishery_state_obj':fishery_state_obj})	 
-
-#################################################################
+########################################################################
 # State views: 	all states in db, 
 #				all states in each fishery,
 #				individual state details,
 #? all states for each crew?
+########################################################################
  
 class StateAllIndexView(generic.ListView):
 	""" all states found in the db

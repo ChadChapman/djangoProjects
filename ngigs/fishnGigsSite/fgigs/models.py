@@ -12,6 +12,8 @@ class State(models.Model):
 	state_name = models.CharField(max_length=30)
 	state_nation = models.CharField(max_length=30)
 	name_abbreviation = models.CharField(max_length=6)
+	max_latitude = models.DecimalField(max_digits=5, decimal_places=3)#a way to order from N to S
+	ordering = ['max_latitude']
 	#fisheries - some list of fishery ids? names?
 	#ports
 	#crew
@@ -20,16 +22,22 @@ class State(models.Model):
 	def __str__(self):
 		return name_abbreviation
 
+class MetaFishery(models.Model):
+	""" broader fishery class to span different states.  
+	"""
+	fishery_name = models.CharField(max_length=50) # eg Dungeness Crab
+	fishery_states = models.CharField(max_length=300) #state names list, should be comma seperated, will get parsed
+	fishery_ids = models.CharField(max_length=50)# state pk list as comma separated list of pk ints
+	#be sure to add ways to access these fields in whatever view this ends up in/as	
+
 class Fishery(models.Model):
-	"""all relevant info for a specific fishery, changed from each state having 
-	own table to each Fishery having a list of names? keys? to States where each
-	Fishery is located
-	actually going to do both state specific and general.  if the state_id_list
-	is of length = 1, it is a state_fishery. if length > 1 , it is an index_fishery
+	"""all relevant info for a specific fishery, in a specific state.
+	actually going to do both state specific and general. this is the state-specific
+	class, MetaFishery will be the broader class that spans states.
 	"""
 	fishery_name = models.CharField(max_length=50) # eg Oregon Dungeness Crab, state specific
-	fishery_type = models.CharField(max_length=50) # eg Dungeness Crab, meta fishery name
-	fishery_type_id = models.IntegerField() # may become an fk if FisheryType model is created 
+	fishery_type = models.CharField(max_length=50) # eg Dungeness Crab, meta fishery name? redundant?
+	fishery_type_id = models.ForeignKey(MetaFishery, on_delete=models.CASCADE)  
 	fishery_state = models.CharField(max_length=50)
 	fishery_state_id = models.ForeignKey(State, on_delete=models.CASCADE)
 	"""rather than the two fields above, (actusally going ot use those for a min) 
@@ -94,7 +102,10 @@ class Crew(models.Model):
 	crew_last_name = models.CharField(max_length=32)
 	
 	#selected fishery this crew ad is for
-	crew_fishery = models.ForeignKey(Fishery, on_delete=models.CASCADE)
+	crew_fishery_name = models.CharField(max_length=50)
+	crew_fishery_id = models.ForeignKey(Fishery, on_delete=models.CASCADE)
+	crew_fishery_type_name = models.CharField(max_length=50)#metafishery type
+	crew_fishery_type_id = models.ForeignKey(MetaFishery, on_delete=models.CASCADE)
 	#date/time crew available to start work
 	crew_available = models.DateTimeField
 	#blurb crew ad poster can write about themselves
@@ -117,6 +128,7 @@ class Crew(models.Model):
 	
 	#the time, date a user created a crew ad to post
 	crew_ad_created = models.DateTimeField(auto_now_add=True)
+	get_latest_by = "crew_ad_created"
 	#the amount of time user selected their ad to run, in days eg: 3,5,7
 	crew_ad_runtime = models.IntegerField()
 	
@@ -136,8 +148,7 @@ class Crew(models.Model):
 	will_travel = models.BooleanField()
 	phone_number = models.CharField(max_length=30)
 	email_addr = models.CharField(max_length=50)
-	
-	
+		
 	#how many views this crew's ad has gotten
 	#crew_looks = models.IntegerField(default=0) #how many time someone has looked at their profile
 
