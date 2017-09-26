@@ -51,13 +51,13 @@ urlpatterns = [
 	 
 	# /fgigs/fisheries/3/states/2/details
 	# show fishery with pk=3, in a specific state with state pk = 2, view is a DetailView
-	url(r'^fisheries/(?P<fishery_id>[0-9]+)/states/(?P<state_id>[0-9]+)/$', 
-	views.FisheryPKStatePKView.as_view(), name='fisherypkstatepk')
+	url(r'^fisheries/(?P<type_id>[0-9]+)/states/(?P<state_id>[0-9]+)/$', 
+	views.FisheryStateDetailView.as_view(), name='fisherystatedetail')
 	
 	# /fgigs/fisheries/3/states/2/crew/
 	# show fishery with pk=3, in state with pk = 2
 	url(r'^fisheries/(?P<fishery_id>[0-9]+)/states/(?P<state_id>[0-9]+)/crew/$', 
-	views.FisheryPKStatePKCrewView.as_view(), name='fisherypkstatepkcrew'),
+	views.FisheryStateAllCrewView.as_view(), name='fisherystateallcrew'),
 		
 	####################################################################
 	""" state routings
