@@ -28,6 +28,7 @@ urlpatterns = [
 	""" fishery routings
 	"""
 	######################### META FISHERIES ###########################
+	
 	# /fgigs/fisheries/all/
 	# show index of all meta fisheries, direct link from index page button
 	url(r'^fisheries/all/$', views.FisheryAllIndexView.as_view(), name='fisheryallindex')
@@ -43,11 +44,11 @@ urlpatterns = [
 	
 	# /fgigs/fisheries/3/crew/
 	# show crew ads for metafishery where metafishery pk=3
-	url(r'^fisheries/(?P<metafishery_id>[0-9]+)/crew/$', views.MetaFisheryCrewView.as_view(), 
-	name='metafisherycrew')
+	url(r'^fisheries/(?P<metafishery_id>[0-9]+)/crew/$', views.MetaFisheryAllCrewView.as_view(), 
+	name='metafisheryallcrew')
 	
 	##################### FISHERIES BY STATE ###########################
-	# 
+	 
 	# /fgigs/fisheries/3/states/2/details
 	# show fishery with pk=3, in a specific state with state pk = 2, view is a DetailView
 	url(r'^fisheries/(?P<fishery_id>[0-9]+)/states/(?P<state_id>[0-9]+)/$', 

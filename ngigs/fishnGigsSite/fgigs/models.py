@@ -12,6 +12,8 @@ class State(models.Model):
 	state_name = models.CharField(max_length=30)
 	state_nation = models.CharField(max_length=30)
 	name_abbreviation = models.CharField(max_length=6)
+	max_latitude = models.DecimalField(max_digits=5, decimal_places=3)#a way to order from N to S
+	ordering = ['max_latitude']
 	#fisheries - some list of fishery ids? names?
 	#ports
 	#crew
@@ -100,7 +102,10 @@ class Crew(models.Model):
 	crew_last_name = models.CharField(max_length=32)
 	
 	#selected fishery this crew ad is for
-	crew_fishery = models.ForeignKey(Fishery, on_delete=models.CASCADE)
+	crew_fishery_name = models.CharField(max_length=50)
+	crew_fishery_id = models.ForeignKey(Fishery, on_delete=models.CASCADE)
+	crew_fishery_type_name = models.CharField(max_length=50)#metafishery type
+	crew_fishery_type_id = models.ForeignKey(MetaFishery, on_delete=models.CASCADE)
 	#date/time crew available to start work
 	crew_available = models.DateTimeField
 	#blurb crew ad poster can write about themselves
@@ -123,6 +128,7 @@ class Crew(models.Model):
 	
 	#the time, date a user created a crew ad to post
 	crew_ad_created = models.DateTimeField(auto_now_add=True)
+	get_latest_by = "crew_ad_created"
 	#the amount of time user selected their ad to run, in days eg: 3,5,7
 	crew_ad_runtime = models.IntegerField()
 	
@@ -142,8 +148,7 @@ class Crew(models.Model):
 	will_travel = models.BooleanField()
 	phone_number = models.CharField(max_length=30)
 	email_addr = models.CharField(max_length=50)
-	
-	
+		
 	#how many views this crew's ad has gotten
 	#crew_looks = models.IntegerField(default=0) #how many time someone has looked at their profile
 

@@ -46,22 +46,40 @@ class FisheryAllIndexView(generic.ListView):
 	these should be by type_id and  
 	"""
 	#override the default template name
-	template_name = 'fgigs/fisheryallindex.html'
+	template_name = 'fgigs/metafisheryallindex.html'
 	#override the autogen context var with this:
-	context_object_name = 'fishery_all_list'
+	context_object_name = 'metafishery_all_list'
 	
 	def get_queryset(self):
-		#should return all fisheries in db
-		#change this b/c it should be meta types, eg Salmon, Tuna, Crab not state specific
-		#may need a model for meta fishery of some type
-		return Fishery.objects.all()
+		# should return all fisheries in db, it should be meta types, 
+		# eg Salmon, Tuna, Crab and not state specific
+		return MetaFishery.objects.all()
 	
 #################################################################
 
-class FisheryAllStatesView(generic.ListView):
-	""" all states in a single fishery. """
-	template_name = 'fgigs/fisheryallstatesindex.html'
-	context_object_name = 'fishery_all_states_list' 
+class MetaFisheryDetailView(generic.DetailView):
+	""" one fishery, in all states 
+	"""
+	model = MetaFishery
+	template_name = 'fgigs/metafisherydetail.html'
+	context_object_name = 'metafishery_detail' 
+	
+	def get_queryset(self):
+		try:
+			metafishery_query = MetaFishery.objects.filter(id=metafishery_id)
+		except(KeyError, MetaFishery.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/metafisherynotfound.html', {
+				'error_message':"No details for that Fishery were found.",
+				})
+		else:
+			return metafishery_query
+		
+#################################################################
+
+class MetaFisheryAllStatesView(generic.ListView):
+	""" all states in a single metafishery. """
+	template_name = 'fgigs/metafisheryallstates.html'
+	context_object_name = 'metafishery_all_states_list' 
 	""" each fishery has its own state, so get all fisheries with the fishery_id,
 	then get the states out of those fisheries. This is just listing the states so no
 	need to return actual State objects, names should be fine? then link names to btns
@@ -78,17 +96,31 @@ class FisheryAllStatesView(generic.ListView):
 			return fishery_set
 	
 	def get_state_list(request, type_id):
-		""" here get the State names out of the fisheries returned from the queryset.
+		""" here get the State names out of the metafisheries returned from the queryset.
 		iterate through queryset and add State names to list
 		"""
-		state_list = []
 		query_return = self.get_queryset(self)
-		for fishery in query_return:
-			state_name = fishery.fishery_state
-			state_list += state_name
-		
+		#now make a list from queryset with a split() on the commas
+		states_list = query_return.fishery_states.split(",")
 		return state_list
 	
+#################################################################
+
+class MetaFisheryAllCrewView(generic.ListView):
+	""" all crew in a single metafishery. """
+	template_name = 'fgigs/metafisheryallcrew.html'
+	context_object_name = 'metafishery_all_crew_list' 
+	
+	def get_queryset(self):
+		try:
+			crew_set = Crew.objects.filter(crew_fishery_type_id=metafishery_id)
+		except(KeyError, Fishery.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/metafisherycrewnotfound.html', {
+				'error_message':"No Crew were found for that Fishery.",
+				})
+		else:
+			return crew_set
+			
 #################################################################
 
 class FisheryPKStateFKIndexView(generic.DetailView):
@@ -179,11 +211,12 @@ class FisheryPKCrewView(generic.ListView):
 
 
 
-
+########################################################################
 # State views: 	all states in db, 
 #				all states in each fishery,
 #				individual state details,
 #? all states for each crew?
+########################################################################
  
 class StateAllIndexView(generic.ListView):
 	""" all states found in the db
