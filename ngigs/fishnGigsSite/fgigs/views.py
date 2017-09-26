@@ -290,71 +290,62 @@ class CrewAllIndexView(generic.ListView):
 		try:
 			index_query = Crew.objects.all() 
 		except(EmptyResultSet):
-			return render(request, 'fgigs/crewnotfound.html', {
-				'error_message':"Crew was not found.",
+			return render(request, 'fgigs/crewallnotfound.html', {
+				'error_message':"All Crew listings was not found.",
 				})
 		else:
 			return index_query 
-			
+	#again this method below seems redundant?		
 	def get_crew_list(self):
 		crew_query_all = self.get_queryset
 		return list(crew_query_all)	
 
-#################################################################
+########################################################################
 
-class CrewFisheryAllIndexView(generic.ListView):
-	template_name = 'crewfisheryallindex.html'
-	context_object_name = 'crew_fishery_all_list'
+class CrewNewView(generic.FormView):
+	""" template should be form for creating a new Crew listing
+	probably needs some additional assignments, just not aware of those right now
+	"""
+	template_name = 'crewnew.html'
+	context_object_name = 'crew_new'
+	
+########################################################################
+
+class CrewActiveIndexView(generic.ListView):
+	template_name = 'crewactiveindex.html'
+	context_object_name = 'crew_active_list'
 	
 	def get_queryset(self):
 		try:
-			index_query = Crew.objects.filter(crew_fishery=fishery_id)
-		except(KeyError, Fishery.DoesNotExist, EmptyResultSet):
-			return render(request, 'fgigs/crewfisherynotfound.html', {
+			active_query = Crew.objects.filter(crew_ad_active=True) 
+		except(EmptyResultSet):
+			return render(request, 'fgigs/crewactivenotfound.html', {
+				'error_message':"Active Crew listings were not found.",
+				})
+		else:
+			return active_query 
+	#again this method below seems redundant?		
+	def get_crew_list(self):
+		crew_query_active = self.get_queryset
+		return list(crew_query_active)	
+
+########################################################################
+
+class CrewMetaFisheryAllView(generic.ListView):
+	template_name = 'crewmetafisheryall.html'
+	context_object_name = 'crew_metafishery_all_list'
+	
+	def get_queryset(self):
+		try:
+			index_query = Crew.objects.filter(crew_fishery_type_id=metafishery_id)
+		except(KeyError, Crew.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/crewmetafisherynotfound.html', {
 				'error_message':"No Crew in that Fishery was found.",
 				})
 		else:
 			return index_query
 
-#################################################################
-
-class CrewStateAllIndexView(generic.Listview):
-	""" all crew in a single state, should filter by both home_port and current_port
-	for crew listings, then return single set of all distincts """
-	template_name = 'crewstateallindex.html'
-	context_object_name = 'crew_state_all_list'
-	
-	def get_queryset(self):
-		try:
-			index_query = Crew.objects.filter(home_port_state=state_id | 
-			current_port_state = state_id)
-		except(KeyError, State.DoesNotExist, EmptyResultSet):
-			return render(request, 'fgigs/crewstatenotfound.html', {
-				'error_message':"No Crew in that State was found.",
-				})
-		else:
-			return index_query
-
-#################################################################
-
-class CrewFisheryStateAllIndexView(generic.Listview):
-	""" all crew in a fishery in a state, again crew should be filtered by home_port
-	OR current_port, as well as Fishery """
-	template_name = 'crewfisherystateallindex.html'
-	context_object_name = 'crew_fishery_state_all_list'
-	
-	def get_queryset(self):
-		try:
-			index_query = Crew.objects.filter(home_port_state=state_id | 
-			current_port_state = state_id, crew_fishery=fishery_id)
-		except(KeyError, EmptyResultSet):
-			return render(request, 'fgigs/crewfisherystatenotfound.html', {
-				'error_message':"No Crew in that Fishery in that State was found.",
-				})
-		else:
-			return index_query
-
-#################################################################
+########################################################################
 
 class CrewDetailView(generic.DetailView):
 	""" detail view of a crew listing 
@@ -376,7 +367,9 @@ class CrewDetailView(generic.DetailView):
 		crew_by_id = get_object_or_404(Crew, pk=crew_id)
 		return render(request, 'fgigs/crewdetail.html', {'crew_by_id':crew_by_id})
 			
-#################################################################
+########################################################################
+
+###########################TODOS########################################
 # add new crew listing view
 # add new fishery category view
 # add new state category view
@@ -517,3 +510,64 @@ def goget(request, fishery_id):
 	
 	#response = "this is the result from fishery %s."
 	#return HttpResponse(response % fishery_id)	
+	
+class CrewStateAllView(generic.ListView):
+	template_name = 'crewstateall.html'
+	context_object_name = 'crew_state_all_list'
+	#this is copypasta, think should redirect to original page?
+	def get_queryset(self):
+		try:	
+			""" put these two query sets into a list? dict?, need to filter out distincts 
+			"""		
+			#all crew in a port in selected state as their home port
+			home_crew_list = list(Crew.objects.filter(home_port_state_id=state_id))
+			# any crew whose current port is different than home port but in selected state
+			current_crew_list = list(Crew.objects.filter(current_port_state_id=state_id)
+			.exclude(current_port_state_id=home_port_state_id))#hope that comparison works, haha
+		except(KeyError, Crew.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/statecrewnotfound.html', {
+				'error_message':"Crew for that State selection was not found.",
+				})
+		else:
+			crew_list = home_crew_list + current_crew_list
+			return crew_list
+
+########################################################################
+
+class CrewStateAllIndexView(generic.Listview):
+	""" all crew in a single state, should filter by both home_port and current_port
+	for crew listings, then return single set of all distincts """
+	template_name = 'crewstateallindex.html'
+	context_object_name = 'crew_state_all_list'
+	
+	def get_queryset(self):
+		try:
+			index_query = Crew.objects.filter(home_port_state=state_id | 
+			current_port_state = state_id)
+		except(KeyError, State.DoesNotExist, EmptyResultSet):
+			return render(request, 'fgigs/crewstatenotfound.html', {
+				'error_message':"No Crew in that State was found.",
+				})
+		else:
+			return index_query
+
+#################################################################
+
+class CrewFisheryStateAllIndexView(generic.Listview):
+	""" all crew in a fishery in a state, again crew should be filtered by home_port
+	OR current_port, as well as Fishery """
+	template_name = 'crewfisherystateallindex.html'
+	context_object_name = 'crew_fishery_state_all_list'
+	
+	def get_queryset(self):
+		try:
+			index_query = Crew.objects.filter(home_port_state=state_id | 
+			current_port_state = state_id, crew_fishery=fishery_id)
+		except(KeyError, EmptyResultSet):
+			return render(request, 'fgigs/crewfisherystatenotfound.html', {
+				'error_message':"No Crew in that Fishery in that State was found.",
+				})
+		else:
+			return index_query
+
+#################################################################
