@@ -1,0 +1,7 @@
+{% extends "indextemplate.html" %}
+
+<ul>
+	{% for mf in metafishery_all_list %}
+		<li> {{mf.detail}} </li>
+	{% endfor %}
+</ul>
