@@ -1,15 +1,23 @@
-{% load static %}
+{% extends "indextemplate.html" %}
 
-<!-- static tag gens abs. url of static files -->
-<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}" />
-
-{% if latest_fishery_list %}
-	<ul>
-	{% for fishery in latest_fishery_list %}
-		<li><a href="{% url 'fgigs:detail' fishery.id %}">
-			{{fishery.description_text }}</a></li>
-	{% endfor %}
-	</ul>
-{% else %}
-	<p>No fisheries are available to list</p>
-{% endif %}
+<!--buttons to display: portGigs, fisheryGigs, portCrew, fisheryCrew  -->
+			<div class = 'landingPageButtons'>
+				<ul>
+					<button type="button" class="btn btn-success btn-lg btn-block newDeckhandBtn col-lg">
+						<a href = '{{url_for('newDeckhand') }}'>New crew member listing</a>
+					</button>
+					<button type="button" class="btn btn-success btn-lg btn-block newGigBtn col-lg">
+						<a href = '{{url_for('newGig') }}'>New job listing</a>
+					</button>
+					<!--<span class = 'portsBtn'><p></p><a href='{{url_for('portsIndex') }}'>Search by Port</a></span>-->
+					<button type="button" class="btn btn-success btn-lg btn-block portsBtn col-lg"
+						data-toggle="tooltip" data-placement="right" title="jobs and crew listings, by port">
+						<a href='{{url_for('portsIndex') }}'>Search by Port</a>
+					</button>
+					<!--<span class = 'fisheriesBtn'><p></p><a href='{{url_for('fisheriesIndex') }}'>Search by Fishery</a></span>-->
+					<button type="button" class="btn btn-success btn-lg btn-block fisheriesBtn col-lg"
+						data-toggle="tooltip" data-placement="right" title="jobs and crew listings, by fishery">
+						<a href='{{url_for('fisheriesIndex') }}'>Search by Fishery</a>
+					</button>
+				</ul>
+			</div>
